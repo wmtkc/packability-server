@@ -1,8 +1,18 @@
 import { ApolloServer } from 'apollo-server';
-import { typeDefs } from '@src/gql/typeDefs';
-import { resolvers } from '@src/gql/resolvers';
+import mongoose from 'mongoose';
 
-const server = new ApolloServer({ typeDefs, resolvers });
-server.listen({ port: 4000 }).then(({ url }) => {
-  console.log(`🚀  Server ready at ${url}`);
-}); 
+import schema from '@src/schemas/_schema';
+
+const startServer = async () => {
+
+    // Connect to the database
+    await mongoose.connect('mongodb://localhost:27017/packability');
+
+    // Start GraphQL Server
+    const server = new ApolloServer({ schema });
+    server.listen({ port: 4000 }).then(({ url }) => {
+        console.log(`🚀  Server ready at ${url}`);
+    }); 
+}
+
+startServer();
