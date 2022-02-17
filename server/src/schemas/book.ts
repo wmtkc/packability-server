@@ -9,8 +9,13 @@ export const typeDef = gql`
         author: String!
     }
 
+    type _booksMeta {
+        count: Int!
+    }
+
     type Query {
-        getBooks: [Book]!
+        books(skip: Int, first: Int): [Book]!
+        _booksMeta: _booksMeta
     }
 
     type Mutation {
@@ -21,13 +26,23 @@ export const typeDef = gql`
 // Define your resolvers
 export const resolvers = {
     Query: {
-        getBooks: async () => Book.find()
+        books: async (_: any, args: any) => {
+            console.dir(args);
+            return await Book.find()
+                             .skip(args.skip)
+                             .limit(args.first)
+        },
+        _booksMeta: async () => {
+            return {
+                count: await Book.count()
+            }
+        }
     },
 
     Mutation: {
         createBook: async (_: any, args: any ) => {
             const book = new Book({ title: args.title, author: args.author });
             return book.save();
-         }
+        }
     }
 };
