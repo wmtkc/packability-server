@@ -4,7 +4,7 @@ import { Book } from '@src/models/Book';
 // Define your types
 export const typeDef = gql`
     type Book {
-        id: ID
+        id: ID!
         title: String!
         author: String!
     }
@@ -27,7 +27,6 @@ export const typeDef = gql`
 export const resolvers = {
     Query: {
         books: async (_: any, args: any) => {
-            console.dir(args);
             return await Book.find()
                              .skip(args.skip)
                              .limit(args.first)
@@ -42,7 +41,12 @@ export const resolvers = {
     Mutation: {
         createBook: async (_: any, args: any ) => {
             const book = new Book({ title: args.title, author: args.author });
-            return book.save();
+            try {
+                let result = await book.save();
+                return result;
+            } catch (err) {
+                throw err;
+            }
         }
     }
 };
