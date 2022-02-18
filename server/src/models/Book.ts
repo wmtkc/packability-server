@@ -8,8 +8,8 @@ interface Book extends Document {
 
 // 2. Create a Schema corresponding to the document interface.
 const schema = new Schema<Book>({
-    title: { type: String, required: true },
-    author: { type: String, required: true } 
+    title: String,
+    author: String
 });
 
 // 3. Create a Model for export.
