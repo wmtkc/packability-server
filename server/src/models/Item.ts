@@ -3,13 +3,13 @@ import { Schema, model, Document } from 'mongoose';
 // 1. Create an interface representing a document in MongoDB.
 interface Item extends Document {
     name: string
-    url: string
+    extUrl: string
 }
 
 // 2. Create a Schema corresponding to the document interface.
 const schema = new Schema<Item>({
     name: String,
-    url: String
+    extUrl: String
 });
 
 // 3. Create a Model for export.
