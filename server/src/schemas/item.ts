@@ -6,7 +6,7 @@ export const typeDef = gql`
     type Item {
         id: ID!
         name: String!
-        url: String!
+        extUrl: String
     }
 
     type _itemsMeta {
@@ -14,23 +14,22 @@ export const typeDef = gql`
     }
 
     type Query {
-        items(skip: Int, first: Int): [Item]!
+        items(skip: Int, first: Int): [Item!]
         _itemsMeta: _itemsMeta
     }
 
     type Mutation {
-        createItem(name: String! url: String!): Item!
+        createItem(name: String! extUrl: String!): Item!
     }
 `
 
 // Define your resolvers
 export const resolvers = {
     Query: {
-        items: async (_: any, args: any) => {
-            console.dir(args);
+        items: async (_: any, args: { skip?: number, first?: number}) => {
             return await Item.find()
-                             .skip(args.skip)
-                             .limit(args.first)
+                             .skip(args.skip ?? 0)
+                             .limit(args.first ?? 0)
         },
         _itemsMeta: async () => {
             return {
@@ -40,11 +39,11 @@ export const resolvers = {
     },
 
     Mutation: {
-        createItem: async (_: any, args: any ) => {
-            const item  = new Item({ name: args.name, url: args.url });
+        createItem: async (_: any, args: { name: string, extUrl: string } ) => {
+            const item  = new Item({ name: args.name, extUrl: args.extUrl });
             try {
-                let result = await item.save();
-                return result;
+                await item.save();
+                return item;
             } catch (err) {
                 throw err;
             }

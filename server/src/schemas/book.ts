@@ -26,10 +26,10 @@ export const typeDef = gql`
 // Define your resolvers
 export const resolvers = {
     Query: {
-        books: async (_: any, args: any) => {
+        books: async (_: any, args: { skip?: number, first?: number }) => {
             return await Book.find()
-                             .skip(args.skip)
-                             .limit(args.first)
+                             .skip(args.skip ?? 0)
+                             .limit(args.first ?? 0)
         },
         _booksMeta: async () => {
             return {
@@ -39,11 +39,11 @@ export const resolvers = {
     },
 
     Mutation: {
-        createBook: async (_: any, args: any ) => {
+        createBook: async (_: any, args: { title: string, author: string } ) => {
             const book = new Book({ title: args.title, author: args.author });
             try {
-                let result = await book.save();
-                return result;
+                await book.save();
+                return book;
             } catch (err) {
                 throw err;
             }

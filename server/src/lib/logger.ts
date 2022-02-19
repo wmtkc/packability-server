@@ -7,8 +7,13 @@ export default {
     console.log("New Request Query:\n" + requestContext.request.query);
 
     if (requestContext.request.variables) {
-        console.log("Vars:")
-        console.dir(requestContext.request.variables)
+        console.log("Vars:");
+        console.dir(requestContext.request.variables);
+    }
+
+    if (requestContext.request.headers) {
+      console.log("Headers:");
+      console.dir(requestContext.request.headers);
     }
 
     return {
