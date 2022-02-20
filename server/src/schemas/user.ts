@@ -34,12 +34,13 @@ export const typeDef = gql`
     type Query {
         users(skip: Int, first: Int): [User!]
         login(usernameOrEmail: String!, password: String!): AuthData!
+        isUsernameAvailable(username: String!): Boolean!
         getUserBags(user: ID!): [Bag!]
         _usersMeta: _usersMeta
     }
 
     type Mutation {
-        createUser(username: String!, email: String!, password: String!, name: String): User!
+        createUser(username: String!, email: String!, password: String!): User!
     }
 `
 
@@ -86,6 +87,11 @@ export const resolvers = {
                 expiresIn: 120
             };
         },
+        isUsernameAvailable: async (_: any, args: { username: string }) => {
+            // TODO: check cache first
+            const user = await User.findOne({ username: args.username });
+            return !Boolean(user);
+        },
         getUserBags: async (_: any, args: { user: Schema.Types.ObjectId }) => {
             const user = await User.findById( args.user );
             if (!user) throw new Error('User not found');
@@ -104,7 +110,7 @@ export const resolvers = {
     },
 
     Mutation: {
-        createUser: async (_: any, args: { username: string, email: string, password: string, name?: string } ) => {
+        createUser: async (_: any, args: { username: string, email: string, password: string } ) => {
 
             let existingUser = await User.findOne({ email: args.email });
             if (existingUser) {
@@ -117,7 +123,9 @@ export const resolvers = {
             }
 
             const passwordHash = await bcrypt.hash(args.password, 10);
-            const user = new User({ username: args.username, email: args.email, passwordHash: passwordHash, name: args.name, createdAt: now, updatedAt: now });
+            const user = new User({ username: args.username, email: args.email, passwordHash: passwordHash, createdAt: now, updatedAt: now });
+
+            // TODO: cache username for isUsernameAvailable query to avoid unneccesary DB accesses
 
             try {
                 await user.save();

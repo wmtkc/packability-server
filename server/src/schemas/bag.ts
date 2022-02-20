@@ -84,7 +84,7 @@ export const resolvers = {
             }
         },
         addBagItem: async (_: any, args: { bag: Schema.Types.ObjectId, item: Schema.Types.ObjectId, qty?: number } ) => {
-            // TODO: Can we use Promise.allSettled() here d/s typescript?
+            // TODO: can we use Promise.allSettled() here d/s typescript? would prefer to run these requests in parallel
             const bag = await Bag.findById( args.bag );
             if (!bag) throw new Error('Bag not found');
 
