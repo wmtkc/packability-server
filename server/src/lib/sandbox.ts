@@ -2,16 +2,46 @@ import { ApolloServer } from 'apollo-server';
 import schema from '@src/schemas/_schema';
 import { Bag } from '@src/models/Bag';
 import { Item } from '@src/models/Item';
+import { Client } from '@notionhq/client';
+import 'dotenv/config';
+
+const notion = new Client({ auth: process.env.NOTION_API_KEY });
 
 const server = new ApolloServer({schema});
 
 export default async () => {
 
-//     const now = new Date();
-//     const bag = new Bag({ name: 'hike', createdAt: now, updatedAt: now }); 
-//     const item = new Item({ name: 'apple', url: 'https://example.com/' }); 
-//     console.log(bag);
+    const databaseId = '200b8f904dfe4285a0cd58649ffa3c9a';
+    try {
+        const response = await notion.databases.query({
+          database_id: databaseId,
+          filter: {
+              property: 'Published',
+              checkbox: {
+                  equals: true,
+              },
+          },
+          sorts: [
+            {
+              property: 'Date',
+              direction: 'ascending',
+            },
+          ],
+        });
 
-//     bag.items.push(item._id);
-//     console.log(bag);
+        if (response.results) {
+            // @ts-ignore
+            console.log(response.results[0]);
+
+            response.results.forEach(async (page, i) => {
+                if (page.id) {
+                    const pageObj = await notion.pages.retrieve({ page_id: page.id });
+                    if (i === 2) console.log(pageObj);
+                }
+            });
+        }
+    } catch (e) {
+        console.dir(e);
+    }
+
 }

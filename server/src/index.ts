@@ -15,7 +15,7 @@ const startServer = async () => {
   const server = new ApolloServer({ schema, context: auth, plugins: [logger] });
   server.listen({ port: 4000 }).then(({ url }) => {
     console.log(`🚀  Server ready at ${url}`);
-    //sandbox();
+    sandbox();
   });
 };
 
