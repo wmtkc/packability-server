@@ -7,6 +7,7 @@
   },
   "private": true,
   "dependencies": {
+    "@notionhq/client": "^0.4.13",
     "apollo-server": "^3.6.3",
     "bcrypt": "^5.0.1",
     "graphql": "^16.3.0",
@@ -21,6 +22,7 @@
     "@types/jsonwebtoken": "^8.5.8",
     "@types/mongoose": "^5.11.97",
     "@types/node": "^17.0.18",
+    "dotenv": "^16.0.0",
     "jest": "^27.5.1",
     "nodemon": "^2.0.15",
     "ts-jest": "^27.1.3",
