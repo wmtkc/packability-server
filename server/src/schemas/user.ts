@@ -33,7 +33,6 @@ export const typeDef = gql`
 
     type Query {
         users(skip: Int, first: Int): [User!]
-        login(usernameOrEmail: String!, password: String!): AuthData!
         isUsernameAvailable(username: String!): Boolean!
         getUserBags(user: ID!): [Bag!]
         _usersMeta: _usersMeta
@@ -41,6 +40,7 @@ export const typeDef = gql`
 
     type Mutation {
         createUser(username: String!, email: String!, password: String!): User!
+        login(usernameOrEmail: String!, password: String!): AuthData!
     }
 `
 
@@ -53,39 +53,6 @@ export const resolvers = {
             return await User.find()
                 .skip(args.skip ?? 0)
                 .limit(args.first ?? 0)
-        },
-        login: async (_: any, args: { usernameOrEmail: string, password: string }) => {
-
-            if (!args.usernameOrEmail) throw new Error('Provide Username or Email');  
-            if (!args.usernameOrEmail) throw new Error('Password Required');  
-
-            let user;
-
-            // If usernameOrEmail matches email regex
-            if (args.usernameOrEmail
-                    .toLowerCase()
-                    .match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)
-                ) {
-                user = await User.findOne({ email: args.usernameOrEmail });
-            } else {
-                user = await User.findOne({ username: args.usernameOrEmail });
-            } 
-
-            if (!user) throw new Error('User does not exist');
-
-            const res = await bcrypt.compare(args.password, user.passwordHash);
-
-            if (!res) throw new Error('Invalid Credentials');
-            
-            const token = jwt.sign({userId: user.id, email: user.email}, 'SECRET', {
-                expiresIn: '120m'
-            });
-
-            return {
-                userId: user.id,
-                token: token,
-                expiresIn: 120
-            };
         },
         isUsernameAvailable: async (_: any, args: { username: string }) => {
             // TODO: check cache first
@@ -133,6 +100,39 @@ export const resolvers = {
             } catch (err) {
                 throw err;
             }
+        },
+        login: async (_: any, args: { usernameOrEmail: string, password: string }) => {
+
+            if (!args.usernameOrEmail) throw new Error('Provide Username or Email');  
+            if (!args.usernameOrEmail) throw new Error('Password Required');  
+
+            let user;
+
+            // If usernameOrEmail matches email regex
+            if (args.usernameOrEmail
+                    .toLowerCase()
+                    .match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)
+                ) {
+                user = await User.findOne({ email: args.usernameOrEmail });
+            } else {
+                user = await User.findOne({ username: args.usernameOrEmail });
+            } 
+
+            if (!user) throw new Error('User does not exist');
+
+            const res = await bcrypt.compare(args.password, user.passwordHash);
+
+            if (!res) throw new Error('Invalid Credentials');
+            
+            const token = jwt.sign({userId: user.id, email: user.email}, 'SECRET', {
+                expiresIn: '120m'
+            });
+
+            return {
+                userId: user.id,
+                token: token,
+                expiresIn: 120
+            };
         },
     }
 };
