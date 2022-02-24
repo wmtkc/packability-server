@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { User } from '@src/models/User';
-import { ReqRes, Context } from './types/Context';
+import { Request, Response } from 'express';
+import { Context } from './types/Context';
 
 export const createAccessToken = (user: User) => {
     return jwt.sign({userId: user.id, email: user.email}, process.env.ACCESS_TOKEN_SECRET!, {
@@ -10,11 +11,15 @@ export const createAccessToken = (user: User) => {
 
 export const createRefreshToken = (user: User) => {
     return jwt.sign({userId: user.id, email: user.email}, process.env.REFRESH_TOKEN_SECRET!, {
-        expiresIn: '7d'
+        expiresIn: process.env.REFRESH_TOKEN_TTL_DAYS + 'd'
     })
 }
 
-export const auth = ( { req, res }: ReqRes ): Context => {
+export const setRefreshTokenCookie = (res: Response, user: User) => {
+    res.cookie(process.env.REFRESH_TOKEN_COOKIE!, createRefreshToken(user), {httpOnly: true});
+}
+
+export const auth = (req: Request, res: Response): Context => {
     let context = { req, res }
 
     const authHeader = req.headers.authorization;
@@ -44,3 +49,25 @@ export const auth = ( { req, res }: ReqRes ): Context => {
         payload: payload as any,
     }
 }
+
+export const validateRefresh = async (req: Request, res: Response) => {
+    const token = req.cookies.refresh;
+    if (!token) return res.send({ ok: false, accessToken: '' })
+
+    let payload: any = null;
+    try {
+        payload = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET!)
+    } catch (err) {
+        console.error(err)
+        return res.send({ ok: false, accessToken: '' })
+    }
+
+    const user = await User.findOne({ id: payload.userId })
+
+    if (!user) {
+        return res.send({ ok: false, accessToken: '' }) 
+    }
+
+    setRefreshTokenCookie(res, user);
+    return res.send({ ok: true, accessToken: createAccessToken(user)})
+  }
