@@ -1,9 +1,10 @@
-import { gql } from 'apollo-server';
+import { gql } from 'apollo-server-express';
 import { User } from '@src/models/User';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import { Schema } from 'mongoose';
 import { Bag } from '@src/models/Bag';
+import { Context } from '@src/lib/types/Context';
+import { createAccessToken, createRefreshToken } from '@src/lib/auth';
 
 // Define your types
 export const typeDef = gql`
@@ -41,6 +42,7 @@ export const typeDef = gql`
     type Mutation {
         createUser(username: String!, email: String!, password: String!): User!
         login(usernameOrEmail: String!, password: String!): AuthData!
+        logout(userId: ID!): String!
     }
 `
 
@@ -55,7 +57,6 @@ export const resolvers = {
                 .limit(args.first ?? 0)
         },
         isUsernameAvailable: async (_: any, args: { username: string }) => {
-            // TODO: check cache first
             const user = await User.findOne({ username: args.username });
             return !Boolean(user);
         },
@@ -92,8 +93,6 @@ export const resolvers = {
             const passwordHash = await bcrypt.hash(args.password, 10);
             const user = new User({ username: args.username, email: args.email, passwordHash: passwordHash, createdAt: now, updatedAt: now });
 
-            // TODO: cache username for isUsernameAvailable query to avoid unneccesary DB accesses
-
             try {
                 await user.save();
                 return user;
@@ -101,7 +100,7 @@ export const resolvers = {
                 throw err;
             }
         },
-        login: async (_: any, args: { usernameOrEmail: string, password: string }) => {
+        login: async (_: any, args: { usernameOrEmail: string, password: string }, context: Context) => {
 
             if (!args.usernameOrEmail) throw new Error('Provide Username or Email');  
             if (!args.usernameOrEmail) throw new Error('Password Required');  
@@ -120,19 +119,25 @@ export const resolvers = {
 
             if (!user) throw new Error('User does not exist');
 
-            const res = await bcrypt.compare(args.password, user.passwordHash);
+            const match = await bcrypt.compare(args.password, user.passwordHash);
 
-            if (!res) throw new Error('Invalid Credentials');
+            if (!match) throw new Error('Invalid Credentials');
+
+            context.res.cookie('refresh', createRefreshToken(user), {httpOnly: true});
             
-            const token = jwt.sign({userId: user.id, email: user.email}, 'SECRET', {
-                expiresIn: '120m'
-            });
-
             return {
                 userId: user.id,
-                token: token,
-                expiresIn: 120
+                token: createAccessToken(user),
+                expiresIn: process.env.ACCESS_TOKEN_TTL_MINS
             };
         },
+        logout: async (_: any, args: { userId: string }, context: Context) => {
+            console.dir(context);
+            if (context.isAuth) {
+                return "authenticated " + context?.payload?.userId
+            } else {
+                return "not authenticated"
+            }
+        }
     }
 };

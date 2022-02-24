@@ -1,34 +1,46 @@
 import jwt from 'jsonwebtoken';
+import { User } from '@src/models/User';
+import { ReqRes, Context } from './types/Context';
 
-type request = {
-    req: any
+export const createAccessToken = (user: User) => {
+    return jwt.sign({userId: user.id, email: user.email}, process.env.ACCESS_TOKEN_SECRET!, {
+        expiresIn: process.env.ACCESS_TOKEN_TTL_MINS + 'm'
+    });
 }
 
-export default ( { req }: request ) => {
+export const createRefreshToken = (user: User) => {
+    return jwt.sign({userId: user.id, email: user.email}, process.env.REFRESH_TOKEN_SECRET!, {
+        expiresIn: '7d'
+    })
+}
+
+export const auth = ( { req, res }: ReqRes ): Context => {
+    let context = { req, res }
 
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-        return { isAuth: false }; 
+        return { ...context, isAuth: false }; 
     } 
 
     const token = authHeader.split(' ')[1];
     if (!token || token === '') {
-        return { isAuth: false };
+        return { ...context, isAuth: false };
     }
 
-    let decodedToken;
+    let payload;
     try {
-        decodedToken = jwt.verify(token, 'SECRET');
+        payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!);
     } catch (err) {
-        return { isAuth: false };
+        return { ...context, isAuth: false };
     }
 
-    if (!decodedToken || typeof(decodedToken) === 'string') {
-        return { isAuth: false };
+    if (!payload || typeof(payload) === 'string') {
+        return { ...context, isAuth: false };
     }
 
     return {
+        ...context,
         isAuth: true,
-        userId: decodedToken.userId
+        payload: payload as any,
     }
 }

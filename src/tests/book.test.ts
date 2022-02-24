@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { ApolloServer, gql } from 'apollo-server';
+import { ApolloServer, gql } from 'apollo-server-express';
 import schema from '@src/schemas/_schema';
 
 const testServer = new ApolloServer({ schema });

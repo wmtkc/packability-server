@@ -1,4 +1,4 @@
-import { gql } from 'apollo-server';
+import { gql } from 'apollo-server-express';
 import { Schema } from 'mongoose';
 
 import { Bag } from '@src/models/Bag';

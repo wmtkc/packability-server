@@ -1,6 +1,6 @@
 import { Schema, model, Document } from 'mongoose';
 
-interface Bag extends Document {
+export interface Bag extends Document {
     name: string
     owner: Schema.Types.ObjectId,
     items: [{
