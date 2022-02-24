@@ -4,7 +4,12 @@ import bcrypt from 'bcrypt';
 import { Schema } from 'mongoose';
 import { Bag } from '@src/models/Bag';
 import { Context } from '@src/lib/types/Context';
-import { createAccessToken, createRefreshToken, setRefreshTokenCookie } from '@src/lib/auth';
+import { createAccessToken, setRefreshTokenCookie } from '@src/lib/auth';
+
+const revokeRefreshTokensForUser = (user: User) => {
+    user.tokenVersion++
+    user.save()
+}
 
 // Define your types
 export const typeDef = gql`
@@ -42,7 +47,7 @@ export const typeDef = gql`
     type Mutation {
         createUser(username: String!, email: String!, password: String!): User!
         login(usernameOrEmail: String!, password: String!): AuthData!
-        logout(userId: ID!): String!
+        logout(logout: Boolean): String!
     }
 `
 
@@ -131,13 +136,21 @@ export const resolvers = {
                 expiresIn: process.env.ACCESS_TOKEN_TTL_MINS
             };
         },
-        logout: async (_: any, args: { userId: string }, context: Context) => {
+        logout: async (_: any, args: { logout: boolean }, context: Context) => {
             console.dir(context);
-            if (context.isAuth) {
-                return "authenticated " + context?.payload?.userId
-            } else {
-                return "not authenticated"
-            }
+
+            if (!context.isAuth) throw new Error('Not authenticated')
+
+            if (!context.payload) throw new Error('No token payload')
+
+            let user = await User.findById(context.payload.userId)
+
+            if (!user) throw new Error("User not found");
+
+            // Should this be here or only on "reset password", account hacked, etc
+            revokeRefreshTokensForUser(user);
+
+            // TODO: More logout actions
         }
     }
 };

@@ -4,6 +4,7 @@ export interface User extends Document {
     username: string
     email: string
     passwordHash: string
+    tokenVersion: number
     name: string
     bags: [Schema.Types.ObjectId],
     createdAt: Date,
@@ -14,6 +15,7 @@ const schema = new Schema<User>({
     username: String,
     email: String,
     passwordHash: String,
+    tokenVersion: { type: Number, default: 0 },
     name: String,
     bags: [Schema.Types.ObjectId],
     createdAt: Date,
