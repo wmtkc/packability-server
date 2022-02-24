@@ -10,7 +10,7 @@ export const createAccessToken = (user: User) => {
 }
 
 export const createRefreshToken = (user: User) => {
-    return jwt.sign({userId: user.id, email: user.email}, process.env.REFRESH_TOKEN_SECRET!, {
+    return jwt.sign({userId: user.id, email: user.email, tokenVersion: user.tokenVersion }, process.env.REFRESH_TOKEN_SECRET!, {
         expiresIn: process.env.REFRESH_TOKEN_TTL_DAYS + 'd'
     })
 }
@@ -65,6 +65,10 @@ export const validateRefresh = async (req: Request, res: Response) => {
     const user = await User.findOne({ id: payload.userId })
 
     if (!user) {
+        return res.send({ ok: false, accessToken: '' }) 
+    }
+
+    if (user.tokenVersion !== payload.tokenVersion) {
         return res.send({ ok: false, accessToken: '' }) 
     }
 
