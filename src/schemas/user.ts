@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import { Schema } from 'mongoose';
 import { Bag } from '@src/models/Bag';
 import { Context } from '@src/lib/types/Context';
-import { createAccessToken, createRefreshToken } from '@src/lib/auth';
+import { createAccessToken, createRefreshToken, setRefreshTokenCookie } from '@src/lib/auth';
 
 // Define your types
 export const typeDef = gql`
@@ -24,7 +24,7 @@ export const typeDef = gql`
 
     type AuthData {
         userId: ID!
-        token: String!
+        accessToken: String!
         expiresIn: Int! # minutes
     }
 
@@ -123,11 +123,11 @@ export const resolvers = {
 
             if (!match) throw new Error('Invalid Credentials');
 
-            context.res.cookie('refresh', createRefreshToken(user), {httpOnly: true});
+            setRefreshTokenCookie(context.res, user);
             
             return {
                 userId: user.id,
-                token: createAccessToken(user),
+                accessToken: createAccessToken(user),
                 expiresIn: process.env.ACCESS_TOKEN_TTL_MINS
             };
         },

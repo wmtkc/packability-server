@@ -3,22 +3,27 @@ import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
 import 'dotenv/config';
 import express from 'express';
 import http from 'http';
+import cookieParser from 'cookie-parser';
 import mongoose from "mongoose";
 
-import { auth } from "@src/lib/auth";
+import { auth, validateRefresh } from "@src/lib/auth";
 import schema from "@src/schemas/_schema";
 import logger from "@src/lib/logger";
 import sandbox from "@src/lib/sandbox";
 
 const startServer = async () => {
   const app = express();
-  const httpServer = http.createServer(app);
+
+  app.use(cookieParser());
+
+  app.post('/refresh_token', validateRefresh);
 
   // Connect to the database
   await mongoose.connect("mongodb://localhost:27017/packability");
   //mongoose.set('debug', true);
 
   // Start GraphQL Server
+  const httpServer = http.createServer(app);
   const server = new ApolloServer({ 
     schema, 
     context: auth,
