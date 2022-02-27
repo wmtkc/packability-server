@@ -14,7 +14,7 @@ export const typeDef = gql`
     }
 
     type Query {
-        books(skip: Int, first: Int): [Book]!
+        books(skip: Int, first: Int): [Book!]
         _booksMeta: _booksMeta
     }
 

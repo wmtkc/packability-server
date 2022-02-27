@@ -30,7 +30,6 @@ export const typeDef = gql`
     type AuthData {
         userId: ID!
         accessToken: String!
-        expiresIn: Int! # minutes
     }
 
     type _usersMeta {
@@ -133,7 +132,6 @@ export const resolvers = {
             return {
                 userId: user.id,
                 accessToken: createAccessToken(user),
-                expiresIn: process.env.ACCESS_TOKEN_TTL_MINS
             };
         },
         logout: async (_: any, args: { logout: boolean }, context: Context) => {
