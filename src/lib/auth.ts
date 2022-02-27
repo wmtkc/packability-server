@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { User } from '@src/models/User';
 import { Request, Response } from 'express';
-import { Context } from './types/Context';
+import { Context } from '@src/lib/types/Context';
 
 export const createAccessToken = (user: User) => {
     return jwt.sign({userId: user.id, email: user.email}, process.env.ACCESS_TOKEN_SECRET!, {
@@ -21,8 +21,9 @@ export const setRefreshTokenCookie = (res: Response, user: User) => {
 
 export const auth = (req: Request, res: Response): Context => {
     let context = { req, res }
+    console.dir(context);
 
-    const authHeader = req.headers.authorization;
+    const authHeader = req.headers?.authorization ?? null;
     if (!authHeader) {
         return { ...context, isAuth: false }; 
     } 

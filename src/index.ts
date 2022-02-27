@@ -2,7 +2,9 @@ import { ApolloServer } from "apollo-server-express";
 import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
 import 'dotenv/config';
 import express from 'express';
+import { graphqlHTTP } from 'express-graphql';
 import http from 'http';
+import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import mongoose from "mongoose";
 
@@ -13,9 +15,20 @@ import sandbox from "@src/lib/sandbox";
 
 const startServer = async () => {
   const app = express();
-
   app.use(cookieParser());
 
+  app.use(cors({
+    origin: 'http://localhost:3000'
+  }));
+
+  // Provide express response to graphql API
+  app.use('/graphql', (req, res) => {
+    return graphqlHTTP({
+      schema,
+      context: { req, res },
+    })(req, res);
+  });
+  
   app.post('/refresh_token', validateRefresh);
 
   // Connect to the database
