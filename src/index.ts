@@ -18,7 +18,8 @@ const startServer = async () => {
   app.use(cookieParser());
 
   app.use(cors({
-    origin: 'http://localhost:3000'
+    origin: 'http://localhost:3000',
+    credentials: true
   }));
 
   // Provide express response to graphql API
@@ -47,7 +48,7 @@ const startServer = async () => {
   });
   
   await server.start();
-  server.applyMiddleware({ app });
+  server.applyMiddleware({ app, cors: false });
 
   await new Promise<void>(resolve => httpServer.listen({ port: 4000 }, resolve));
   console.log(`🚀  Server ready at http://localhost:4000${server.graphqlPath}`);
