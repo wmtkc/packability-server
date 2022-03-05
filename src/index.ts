@@ -2,7 +2,6 @@ import { ApolloServer } from "apollo-server-express";
 import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
 import 'dotenv/config';
 import express from 'express';
-import { graphqlHTTP } from 'express-graphql';
 import http from 'http';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -18,18 +17,10 @@ const startServer = async () => {
   app.use(cookieParser());
 
   app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000', 'https://studio.apollographql.com'],
     credentials: true
   }));
 
-  // Provide express response to graphql API
-  app.use('/graphql', (req, res) => {
-    return graphqlHTTP({
-      schema,
-      context: { req, res },
-    })(req, res);
-  });
-  
   app.post('/refresh_token', validateRefresh);
 
   // Connect to the database
@@ -44,7 +35,7 @@ const startServer = async () => {
     plugins: [
       logger, 
       ApolloServerPluginDrainHttpServer({ httpServer })
-    ] 
+    ]
   });
   
   await server.start();

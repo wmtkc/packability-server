@@ -38,6 +38,7 @@ export const typeDef = gql`
 
     type Query {
         users(skip: Int, first: Int): [User!]
+        me: User
         isUsernameAvailable(username: String!): Boolean!
         getUserBags(user: ID!): [Bag!]
         _usersMeta: _usersMeta
@@ -59,6 +60,17 @@ export const resolvers = {
             return await User.find()
                 .skip(args.skip ?? 0)
                 .limit(args.first ?? 0)
+        },
+        me: async (_: any, args: {}, context: Context) => {
+            if (!context.isAuth) return null;
+
+            if (!context.payload) return null;
+
+            const user = await User.findById(context.payload.userId)
+
+            if (!user) return null;
+            
+            return user;
         },
         isUsernameAvailable: async (_: any, args: { username: string }) => {
             const user = await User.findOne({ username: args.username });
@@ -106,6 +118,10 @@ export const resolvers = {
         },
         login: async (_: any, args: { usernameOrEmail: string, password: string }, context: Context) => {
 
+            console.log("IN LOGIN MUTATION")
+            console.dir(context);
+            console.log("IN LOGIN MUTATION")
+
             if (!args.usernameOrEmail) throw new Error('Provide Username or Email');  
             if (!args.usernameOrEmail) throw new Error('Password Required');  
 
@@ -141,12 +157,12 @@ export const resolvers = {
 
             if (!context.payload) throw new Error('No token payload')
 
-            let user = await User.findById(context.payload.userId)
+            const user = await User.findById(context.payload.userId)
 
             if (!user) throw new Error("User not found");
 
             // Should this be here or only on "reset password", account hacked, etc
-            revokeRefreshTokensForUser(user);
+            // revokeRefreshTokensForUser(user);
 
             // TODO: More logout actions
         }

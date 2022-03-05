@@ -4,13 +4,13 @@ import { Request, Response } from 'express';
 import { Context } from '@src/lib/types/Context';
 
 export const createAccessToken = (user: User) => {
-    return jwt.sign({userId: user.id, email: user.email}, process.env.ACCESS_TOKEN_SECRET!, {
+    return jwt.sign({userId: user.id}, process.env.ACCESS_TOKEN_SECRET!, {
         expiresIn: process.env.ACCESS_TOKEN_TTL_MINS + 'm'
     });
 }
 
 export const createRefreshToken = (user: User) => {
-    return jwt.sign({userId: user.id, email: user.email, tokenVersion: user.tokenVersion }, process.env.REFRESH_TOKEN_SECRET!, {
+    return jwt.sign({userId: user.id, tokenVersion: user.tokenVersion }, process.env.REFRESH_TOKEN_SECRET!, {
         expiresIn: process.env.REFRESH_TOKEN_TTL_DAYS + 'd'
     })
 }
@@ -19,9 +19,8 @@ export const setRefreshTokenCookie = (res: Response, user: User) => {
     res.cookie(process.env.REFRESH_TOKEN_COOKIE!, createRefreshToken(user), {httpOnly: true});
 }
 
-export const auth = (req: Request, res: Response): Context => {
+export const auth = ({req, res}: {req: Request, res: Response}): Context => {
     let context = { req, res }
-    console.dir(context);
 
     const authHeader = req.headers?.authorization ?? null;
     if (!authHeader) {
@@ -44,11 +43,16 @@ export const auth = (req: Request, res: Response): Context => {
         return { ...context, isAuth: false };
     }
 
-    return {
+    let finalContext =  {
         ...context,
         isAuth: true,
         payload: payload as any,
     }
+
+    console.log(finalContext)
+
+    return finalContext
+
 }
 
 export const validateRefresh = async (req: Request, res: Response) => {
