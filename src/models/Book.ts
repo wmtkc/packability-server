@@ -1,16 +1,16 @@
-import { Schema, model, Document } from 'mongoose';
+import { Document, Schema, model } from 'mongoose'
 
 // 1. Create an interface representing a document in MongoDB.
 export interface Book extends Document {
-    title: string;
-    author: string;
+    title: string
+    author: string
 }
 
 // 2. Create a Schema corresponding to the document interface.
 const schema = new Schema<Book>({
     title: String,
-    author: String
-});
+    author: String,
+})
 
 // 3. Create a Model for export.
-export const Book = model<Book>('Book', schema);
+export const Book = model<Book>('Book', schema)

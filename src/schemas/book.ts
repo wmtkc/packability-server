@@ -1,5 +1,5 @@
-import { gql } from 'apollo-server-express';
-import { Book } from '@src/models/Book';
+import { Book } from '@models/Book'
+import { gql } from 'apollo-server-express'
 
 // Define your types
 export const typeDef = gql`
@@ -26,27 +26,27 @@ export const typeDef = gql`
 // Define your resolvers
 export const resolvers = {
     Query: {
-        books: async (_: any, args: { skip?: number, first?: number }) => {
+        books: async (_: any, args: { skip?: number; first?: number }) => {
             return await Book.find()
-                             .skip(args.skip ?? 0)
-                             .limit(args.first ?? 0)
+                .skip(args.skip ?? 0)
+                .limit(args.first ?? 0)
         },
         _booksMeta: async () => {
             return {
-                count: await Book.count()
+                count: await Book.count(),
             }
-        }
+        },
     },
 
     Mutation: {
-        createBook: async (_: any, args: { title: string, author: string } ) => {
-            const book = new Book({ title: args.title, author: args.author });
+        createBook: async (_: any, args: { title: string; author: string }) => {
+            const book = new Book({ title: args.title, author: args.author })
             try {
-                await book.save();
-                return book;
+                await book.save()
+                return book
             } catch (err) {
-                throw err;
+                throw err
             }
-        }
-    }
-};
+        },
+    },
+}

@@ -1,6 +1,6 @@
-import jwt from 'jsonwebtoken';
-import { User } from '@src/models/User';
-import { Request, Response } from 'express';
+import { User } from '@models/User'
+import { Request, Response } from 'express'
+import jwt from 'jsonwebtoken'
 
 export type AuthData = {
     isAuth: boolean
@@ -10,9 +10,13 @@ export type AuthData = {
 }
 
 const createRefreshToken = (user: User) => {
-    return jwt.sign({userId: user.id, tokenVersion: user.tokenVersion }, process.env.REFRESH_TOKEN_SECRET!, {
-        expiresIn: process.env.REFRESH_TOKEN_TTL_DAYS + 'd'
-    })
+    return jwt.sign(
+        { userId: user.id, tokenVersion: user.tokenVersion },
+        process.env.REFRESH_TOKEN_SECRET!,
+        {
+            expiresIn: process.env.REFRESH_TOKEN_TTL_DAYS + 'd',
+        },
+    )
 }
 
 /**
@@ -21,9 +25,9 @@ const createRefreshToken = (user: User) => {
  * @returns JWT access token
  */
 export const createAccessToken = (user: User): string => {
-    return jwt.sign({userId: user.id}, process.env.ACCESS_TOKEN_SECRET!, {
-        expiresIn: process.env.ACCESS_TOKEN_TTL_MINS + 'm'
-    });
+    return jwt.sign({ userId: user.id }, process.env.ACCESS_TOKEN_SECRET!, {
+        expiresIn: process.env.ACCESS_TOKEN_TTL_MINS + 'm',
+    })
 }
 
 /**
@@ -32,9 +36,12 @@ export const createAccessToken = (user: User): string => {
  * @param user the current user, leave undefined to set empty token
  */
 export const setRefreshTokenCookie = (res: Response, user?: User) => {
-    let token = '';
-    if (user) token = createRefreshToken(user);
-    res.cookie(process.env.REFRESH_TOKEN_COOKIE!, token, {httpOnly: true, path: '/refresh_token'});
+    let token = ''
+    if (user) token = createRefreshToken(user)
+    res.cookie(process.env.REFRESH_TOKEN_COOKIE!, token, {
+        httpOnly: true,
+        path: '/refresh_token',
+    })
 }
 
 /**
@@ -43,26 +50,25 @@ export const setRefreshTokenCookie = (res: Response, user?: User) => {
  * @returns AuthData object
  */
 export const isAuth = (req: Request): AuthData => {
-
-    const authHeader = req.headers?.authorization ?? null;
+    const authHeader = req.headers?.authorization ?? null
     if (!authHeader) {
-        return { isAuth: false }; 
-    } 
+        return { isAuth: false }
+    }
 
-    const token = authHeader.split(' ')[1];
+    const token = authHeader.split(' ')[1]
     if (!token || token === '') {
-        return { isAuth: false };
+        return { isAuth: false }
     }
 
-    let payload;
+    let payload
     try {
-        payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!);
+        payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!)
     } catch (err) {
-        return { isAuth: false };
+        return { isAuth: false }
     }
 
-    if (!payload || typeof(payload) === 'string') {
-        return { isAuth: false };
+    if (!payload || typeof payload === 'string') {
+        return { isAuth: false }
     }
 
     return {
@@ -78,10 +84,10 @@ export const isAuth = (req: Request): AuthData => {
  * @returns send response
  */
 export const validateRefresh = async (req: Request, res: Response) => {
-    const token = req.cookies.refresh;
+    const token = req.cookies.refresh
     if (!token) return res.send({ ok: false, accessToken: '' })
 
-    let payload: any = null;
+    let payload: any = null
     try {
         payload = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET!)
     } catch (err) {
@@ -92,13 +98,13 @@ export const validateRefresh = async (req: Request, res: Response) => {
     const user = await User.findOne({ id: payload.userId })
 
     if (!user) {
-        return res.send({ ok: false, accessToken: '' }) 
+        return res.send({ ok: false, accessToken: '' })
     }
 
     if (user.tokenVersion !== payload.tokenVersion) {
-        return res.send({ ok: false, accessToken: '' }) 
+        return res.send({ ok: false, accessToken: '' })
     }
 
-    setRefreshTokenCookie(res, user);
-    return res.send({ ok: true, accessToken: createAccessToken(user)})
-  }
+    setRefreshTokenCookie(res, user)
+    return res.send({ ok: true, accessToken: createAccessToken(user) })
+}

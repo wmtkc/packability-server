@@ -1,7 +1,5 @@
-import { gql } from 'apollo-server-express';
-import { Item } from '@src/models/Item';
-import notion from '@notionhq/client';
-
+import { Item } from '@models/Item'
+import { gql } from 'apollo-server-express'
 
 // Define your types
 export const typeDef = gql`
@@ -24,14 +22,14 @@ export const typeDef = gql`
 // Define your resolvers
 export const resolvers = {
     Query: {
-        blogposts: async (_: any, args: { skip?: number, first?: number}) => {
-            console.log('hullo');
-            return [];
+        blogposts: async (_: any, args: { skip?: number; first?: number }) => {
+            console.log('hullo')
+            return []
         },
         _postsMeta: async () => {
             return {
-                count: await Item.count((err) => console.log(err))
+                count: await Item.count(err => console.log(err)),
             }
-        }
-    }
-};
+        },
+    },
+}

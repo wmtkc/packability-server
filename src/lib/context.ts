@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
-import {isAuth, AuthData} from '@src/lib/auth';
+
+import { AuthData, isAuth } from '@lib/auth'
 
 type ReqRes = {
     req: Request
@@ -14,12 +15,18 @@ export type Context = ReqRes & AuthData
  * @param param0 Apollo Request Object
  * @returns Context object
  */
-export const setContext = ({req, res}: {req: Request, res: Response}): Context => {
-    const auth = isAuth(req);
+export const setContext = ({
+    req,
+    res,
+}: {
+    req: Request
+    res: Response
+}): Context => {
+    const auth = isAuth(req)
 
     return {
         req,
         res,
-        ...auth
+        ...auth,
     }
 }

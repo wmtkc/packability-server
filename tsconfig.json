@@ -1,41 +1,32 @@
 {
     "compilerOptions": {
-      "target": "es6",
-      "lib": [
-        "dom",
-        "dom.iterable",
-        "esnext",
-        "ES2020.Promise"
-      ],
-      "module": "commonjs",
+        "target": "es6",
+        "lib": ["dom", "dom.iterable", "esnext", "ES2020.Promise"],
+        "module": "commonjs",
 
-      "allowJs": true,
-      "skipLibCheck": true,
-      "esModuleInterop": true,
-      "allowSyntheticDefaultImports": true,
-      "strict": true,
-      "forceConsistentCasingInFileNames": true,
-      "moduleResolution": "node",
-      "resolveJsonModule": true,
-      "isolatedModules": true,
-      "pretty": true,
-      "noEmit": true,
-      
-      "noFallthroughCasesInSwitch": true,
-      "noImplicitAny": true,
-      "strictNullChecks": true,
+        "allowJs": true,
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "pretty": true,
+        "noEmit": true,
 
-      "baseUrl": ".",
-      "paths": {
-        "@src/*": ["src/*"]
-      }
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitAny": true,
+        "strictNullChecks": true,
 
+        "baseUrl": ".",
+        "paths": {
+            "@schemas/*": ["src/schemas/*"],
+            "@models/*": ["src/models/*"],
+            "@lib/*": ["src/lib/*"]
+        }
     },
-    "include": [
-      "src"
-    ],
-    "exclude": [
-      "node_modules"
-    ]
+    "include": ["src"],
+    "exclude": ["node_modules"]
 }
-  
