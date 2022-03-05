@@ -7,10 +7,12 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import mongoose from "mongoose";
 
-import { auth, validateRefresh } from "@src/lib/auth";
 import schema from "@src/schemas/_schema";
+
 import logger from "@src/lib/logger";
 import sandbox from "@src/lib/sandbox";
+import { setContext } from "@src/lib/context";
+import { validateRefresh } from "@src/lib/auth";
 
 const startServer = async () => {
   const app = express();
@@ -31,9 +33,9 @@ const startServer = async () => {
   const httpServer = http.createServer(app);
   const server = new ApolloServer({ 
     schema, 
-    context: auth,
+    context: setContext,
     plugins: [
-      logger, 
+      //logger, 
       ApolloServerPluginDrainHttpServer({ httpServer })
     ]
   });

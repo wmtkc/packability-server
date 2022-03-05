@@ -1,7 +1,13 @@
 import jwt from 'jsonwebtoken';
 import { User } from '@src/models/User';
 import { Request, Response } from 'express';
-import { Context } from '@src/lib/types/Context';
+
+export type AuthData = {
+    isAuth: boolean
+    payload?: {
+        userId: string
+    }
+}
 
 const createRefreshToken = (user: User) => {
     return jwt.sign({userId: user.id, tokenVersion: user.tokenVersion }, process.env.REFRESH_TOKEN_SECRET!, {
@@ -33,43 +39,36 @@ export const setRefreshTokenCookie = (res: Response, user?: User) => {
 
 /**
  * Authenticate and set context
- * @param param0 Apollo request object
- * @returns context object
+ * @param req Apollo request object
+ * @returns AuthData object
  */
-export const auth = ({req, res}: {req: Request, res: Response}): Context => {
-    let context = { req, res }
+export const isAuth = (req: Request): AuthData => {
 
     const authHeader = req.headers?.authorization ?? null;
     if (!authHeader) {
-        return { ...context, isAuth: false }; 
+        return { isAuth: false }; 
     } 
 
     const token = authHeader.split(' ')[1];
     if (!token || token === '') {
-        return { ...context, isAuth: false };
+        return { isAuth: false };
     }
 
     let payload;
     try {
         payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!);
     } catch (err) {
-        return { ...context, isAuth: false };
+        return { isAuth: false };
     }
 
     if (!payload || typeof(payload) === 'string') {
-        return { ...context, isAuth: false };
+        return { isAuth: false };
     }
 
-    let finalContext =  {
-        ...context,
+    return {
         isAuth: true,
         payload: payload as any,
     }
-
-    console.log(finalContext)
-
-    return finalContext
-
 }
 
 /**

@@ -3,7 +3,7 @@ import { User } from '@src/models/User';
 import bcrypt from 'bcrypt';
 import { Schema } from 'mongoose';
 import { Bag } from '@src/models/Bag';
-import { Context } from '@src/lib/types/Context';
+import { Context } from '@src/lib/context';
 import { createAccessToken, setRefreshTokenCookie } from '@src/lib/auth';
 
 const revokeRefreshTokensForUser = (user: User) => {
