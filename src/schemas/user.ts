@@ -28,8 +28,8 @@ export const typeDef = gql`
     }
 
     type AuthData {
-        userId: ID!
         accessToken: String!
+        user: User!
     }
 
     type _usersMeta {
@@ -47,7 +47,7 @@ export const typeDef = gql`
     type Mutation {
         createUser(username: String!, email: String!, password: String!): User!
         login(usernameOrEmail: String!, password: String!): AuthData!
-        logout(logout: Boolean): String!
+        logout: Boolean!
     }
 `
 
@@ -117,11 +117,6 @@ export const resolvers = {
             }
         },
         login: async (_: any, args: { usernameOrEmail: string, password: string }, context: Context) => {
-
-            console.log("IN LOGIN MUTATION")
-            console.dir(context);
-            console.log("IN LOGIN MUTATION")
-
             if (!args.usernameOrEmail) throw new Error('Provide Username or Email');  
             if (!args.usernameOrEmail) throw new Error('Password Required');  
 
@@ -146,25 +141,13 @@ export const resolvers = {
             setRefreshTokenCookie(context.res, user);
             
             return {
-                userId: user.id,
                 accessToken: createAccessToken(user),
+                user: user,
             };
         },
-        logout: async (_: any, args: { logout: boolean }, context: Context) => {
-            console.dir(context);
-
-            if (!context.isAuth) throw new Error('Not authenticated')
-
-            if (!context.payload) throw new Error('No token payload')
-
-            const user = await User.findById(context.payload.userId)
-
-            if (!user) throw new Error("User not found");
-
-            // Should this be here or only on "reset password", account hacked, etc
-            // revokeRefreshTokensForUser(user);
-
-            // TODO: More logout actions
+        logout: async (_: any, args: {}, context: Context) => {
+            setRefreshTokenCookie(context.res);
+            return true;
         }
     }
 };
