@@ -95,7 +95,7 @@ export const validateRefresh = async (req: Request, res: Response) => {
         return res.send({ ok: false, accessToken: '' })
     }
 
-    const user = await User.findOne({ id: payload.userId })
+    const user = await User.findOne({ _id: payload.userId })
 
     if (!user) {
         return res.send({ ok: false, accessToken: '' })
