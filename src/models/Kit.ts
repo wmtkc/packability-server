@@ -1,8 +1,8 @@
 import { Document, Schema, model } from 'mongoose'
 
 export enum KitType {
-    default = 'DEFAULT',
-    none = 'NONE',
+    Default = 'DEFAULT',
+    None = 'NONE',
 }
 
 export interface Kit extends Document {

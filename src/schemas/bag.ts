@@ -94,7 +94,7 @@ export const resolvers = {
             // initialize bag with default kit
             const defaultKit = new Kit({
                 name: 'Uncategorized',
-                type: KitType.default,
+                type: KitType.Default,
                 owner: args.owner,
                 bag: bag.id,
                 createdAt: now,

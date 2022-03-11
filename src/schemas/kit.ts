@@ -8,6 +8,11 @@ import { Schema } from 'mongoose'
 export const typeDef = gql`
     scalar Date
 
+    enum KitType {
+        DEFAULT
+        NONE
+    }
+
     type KitItem {
         id: ID!
         itemId: ID!
@@ -16,7 +21,7 @@ export const typeDef = gql`
 
     type Kit {
         id: ID!
-        type: String!
+        type: KitType!
         name: String!
         owner: ID!
         items: [KitItem!]
@@ -86,7 +91,7 @@ export const resolvers = {
 
             const kit = new Kit({
                 name: args.name,
-                type: KitType.none,
+                type: KitType.None,
                 owner: args.owner,
                 createdAt: now,
                 updatedAt: now,

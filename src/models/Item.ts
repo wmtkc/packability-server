@@ -1,9 +1,9 @@
 import { Document, Schema, model } from 'mongoose'
 
 export enum ItemType {
-    product = 'PRODUCT',
-    nonProduct = 'NON_PRODUCT',
-    generic = 'GENERIC',
+    Product = 'PRODUCT',
+    NonProduct = 'NON_PRODUCT',
+    Generic = 'GENERIC',
 }
 
 // 1. Create an interface representing a document in MongoDB.
