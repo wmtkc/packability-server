@@ -1,5 +1,5 @@
 import { Bag } from '@models/Bag'
-import { Kit, KitTypes } from '@models/Kit'
+import { Kit, KitType } from '@models/Kit'
 import { User } from '@models/User'
 import { gql } from 'apollo-server-express'
 import { Schema } from 'mongoose'
@@ -94,7 +94,7 @@ export const resolvers = {
             // initialize bag with default kit
             const defaultKit = new Kit({
                 name: 'Uncategorized',
-                type: KitTypes.default,
+                type: KitType.default,
                 owner: args.owner,
                 bag: bag.id,
                 createdAt: now,

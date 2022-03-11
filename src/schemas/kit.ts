@@ -1,5 +1,5 @@
 import { Item } from '@models/Item'
-import { Kit, KitTypes } from '@models/Kit'
+import { Kit, KitType } from '@models/Kit'
 import { User } from '@models/User'
 import { gql } from 'apollo-server-express'
 import { Schema } from 'mongoose'
@@ -57,6 +57,8 @@ export const resolvers = {
         getKitItems: async (_: any, args: { kit: Schema.Types.ObjectId }) => {
             const kit = await Kit.findById(args.kit)
             if (!kit) throw new Error('Kit not found')
+
+            // TODO: this should fail silently and return empty array
             if (!kit.items.length) throw new Error('Kit has no items')
 
             const itemsFound = await Item.find({ id: { $in: kit.items } })
@@ -84,7 +86,7 @@ export const resolvers = {
 
             const kit = new Kit({
                 name: args.name,
-                type: KitTypes.none,
+                type: KitType.none,
                 owner: args.owner,
                 createdAt: now,
                 updatedAt: now,

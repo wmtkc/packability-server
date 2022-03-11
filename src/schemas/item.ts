@@ -1,10 +1,17 @@
-import { Item } from '@models/Item'
+import { Item, ItemType } from '@models/Item'
 import { gql } from 'apollo-server-express'
 
 // Define your types
 export const typeDef = gql`
+    enum ItemType {
+        PRODUCT
+        NON_PRODUCT
+        GENERIC
+    }
+
     type Item {
         id: ID!
+        type: ItemType!
         name: String!
         extUrl: String
     }
@@ -13,6 +20,7 @@ export const typeDef = gql`
         count: Int!
     }
 
+    # TODO: _itemTypes - returns all ItemTypes for dynamic handling by client
     type Query {
         items(skip: Int, first: Int): [Item!]
         _itemsMeta: _itemsMeta
@@ -20,7 +28,7 @@ export const typeDef = gql`
 
     # TODO: editItem
     type Mutation {
-        createItem(name: String!, extUrl: String): Item!
+        createItem(name: String!, type: ItemType!, extUrl: String): Item!
     }
 `
 
@@ -40,8 +48,15 @@ export const resolvers = {
     },
 
     Mutation: {
-        createItem: async (_: any, args: { name: string; extUrl?: string }) => {
-            const item = new Item({ name: args.name, extUrl: args.extUrl })
+        createItem: async (
+            _: any,
+            args: { name: string; type: ItemType; extUrl?: string },
+        ) => {
+            const item = new Item({
+                name: args.name,
+                type: args.type,
+                extUrl: args.extUrl,
+            })
             try {
                 await item.save()
                 return item

@@ -1,14 +1,22 @@
 import { Document, Schema, model } from 'mongoose'
 
+export enum ItemType {
+    product = 'PRODUCT',
+    nonProduct = 'NON_PRODUCT',
+    generic = 'GENERIC',
+}
+
 // 1. Create an interface representing a document in MongoDB.
 export interface Item extends Document {
     name: string
+    type: ItemType
     extUrl?: string
 }
 
 // 2. Create a Schema corresponding to the document interface.
 const schema = new Schema<Item>({
     name: String,
+    type: String,
     extUrl: String,
 })
 

@@ -1,13 +1,13 @@
 import { Document, Schema, model } from 'mongoose'
 
-export enum KitTypes {
+export enum KitType {
     default = 'DEFAULT',
     none = 'NONE',
 }
 
 export interface Kit extends Document {
     name: string
-    type: KitTypes
+    type: KitType
     owner: Schema.Types.ObjectId
     bag?: Schema.Types.ObjectId
     items: [
