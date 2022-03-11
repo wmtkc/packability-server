@@ -1,5 +1,5 @@
 import { Bag } from '@models/Bag'
-import { Item } from '@models/Item'
+import { Kit, KitTypes } from '@models/Kit'
 import { User } from '@models/User'
 import { gql } from 'apollo-server-express'
 import { Schema } from 'mongoose'
@@ -8,17 +8,18 @@ import { Schema } from 'mongoose'
 export const typeDef = gql`
     scalar Date
 
-    type BagItem {
+    type BagKit {
         id: ID!
-        itemId: ID!
+        kitId: ID!
         qty: Int!
+        isDefault: Boolean!
     }
 
     type Bag {
         id: ID!
         name: String!
         owner: ID!
-        items: [BagItem!]
+        kits: [BagKit!]!
         createdAt: Date
         updatedAt: Date
     }
@@ -29,13 +30,16 @@ export const typeDef = gql`
 
     type Query {
         bags(skip: Int, first: Int): [Bag!]
-        getBagItems(bag: ID!): [Item!]
+        getBagKits(bag: ID!): [Kit!]!
         _bagsMeta: _bagsMeta
     }
 
+    # TODO: removeBagKit
+    #       editBagKit
+    #       editBag
     type Mutation {
         createBag(name: String!, owner: String!): Bag!
-        addBagItem(bag: ID!, item: ID!, qty: Int): Bag!
+        addBagKit(bag: ID!, kit: ID!, qty: Int): Bag!
     }
 `
 
@@ -50,18 +54,19 @@ export const resolvers = {
                 .skip(args.skip ?? 0)
                 .limit(args.first ?? 0)
         },
-        getBagItems: async (_: any, args: { bag: Schema.Types.ObjectId }) => {
+        getBagKits: async (_: any, args: { bag: Schema.Types.ObjectId }) => {
             const bag = await Bag.findById(args.bag)
             if (!bag) throw new Error('Bag not found')
-            if (!bag.items.length) throw new Error('Bag has no items')
+            if (!bag.kits.length)
+                throw new Error('Bag has no kits -- How did this happen?')
 
-            const itemsFound = await Item.find({ id: { $in: bag.items } })
-            if (!itemsFound)
+            const kitsFound = await Kit.find({ id: { $in: bag.kits } })
+            if (!kitsFound)
                 throw new Error(
-                    'Bag items not found in database -- How did this happen?',
+                    'Bag kits not found in database -- How did this happen?',
                 )
 
-            return itemsFound
+            return kitsFound
         },
         _bagsMeta: async () => {
             return {
@@ -85,19 +90,37 @@ export const resolvers = {
                 updatedAt: now,
             })
             user.bags.push(bag.id)
+
+            // initialize bag with default kit
+            const defaultKit = new Kit({
+                name: 'Uncategorized',
+                type: KitTypes.default,
+                owner: args.owner,
+                bag: bag.id,
+                createdAt: now,
+                updatedAt: now,
+                isDefault: true,
+            })
+            bag.kits.push({
+                kitId: defaultKit.id,
+                qty: 1,
+                isDefault: true,
+            })
+
             try {
                 let result = await bag.save()
+                await defaultKit.save()
                 await user.save()
                 return result
             } catch (err) {
                 throw err
             }
         },
-        addBagItem: async (
+        addBagKit: async (
             _: any,
             args: {
                 bag: Schema.Types.ObjectId
-                item: Schema.Types.ObjectId
+                kit: Schema.Types.ObjectId
                 qty?: number
             },
         ) => {
@@ -105,21 +128,23 @@ export const resolvers = {
             const bag = await Bag.findById(args.bag)
             if (!bag) throw new Error('Bag not found')
 
-            const item = await Item.findById(args.item)
-            if (!item) throw new Error('Item not found')
+            const kit = await Kit.findById(args.kit)
+            if (!kit) throw new Error('Kit not found')
+            kit.bag = bag.id
 
-            let pushNewItem = true
-            bag.items.forEach((item, index, arr) => {
-                if (item.itemId == args.item) {
+            let pushNewKit = true
+            bag.kits.forEach((kit, index, arr) => {
+                if (kit.kitId == args.kit) {
                     arr[index].qty += args.qty ?? 1
-                    pushNewItem = false
+                    pushNewKit = false
                 }
             })
 
-            if (pushNewItem) {
-                bag.items.push({
-                    itemId: args.item,
+            if (pushNewKit) {
+                bag.kits.push({
+                    kitId: args.kit,
                     qty: args.qty ?? 1,
+                    isDefault: false,
                 })
             }
 
@@ -127,6 +152,7 @@ export const resolvers = {
 
             try {
                 await bag.save()
+                await kit.save()
                 return bag
             } catch (err) {
                 throw err

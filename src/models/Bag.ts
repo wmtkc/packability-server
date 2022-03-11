@@ -3,10 +3,11 @@ import { Document, Schema, model } from 'mongoose'
 export interface Bag extends Document {
     name: string
     owner: Schema.Types.ObjectId
-    items: [
+    kits: [
         {
-            itemId: Schema.Types.ObjectId
+            kitId: Schema.Types.ObjectId
             qty: number
+            isDefault: boolean
         },
     ]
     createdAt: Date
@@ -16,10 +17,11 @@ export interface Bag extends Document {
 const schema = new Schema<Bag>({
     name: String,
     owner: Schema.Types.ObjectId,
-    items: [
+    kits: [
         {
-            itemId: Schema.Types.ObjectId,
+            kitId: Schema.Types.ObjectId,
             qty: Number,
+            isDefault: Boolean,
         },
     ],
     createdAt: Date,

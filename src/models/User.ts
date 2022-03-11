@@ -7,6 +7,7 @@ export interface User extends Document {
     tokenVersion: number
     name: string
     bags: [Schema.Types.ObjectId]
+    kits: [Schema.Types.ObjectId]
     createdAt: Date
     updatedAt: Date
 }
@@ -18,6 +19,7 @@ const schema = new Schema<User>({
     tokenVersion: { type: Number, default: 0 },
     name: String,
     bags: [Schema.Types.ObjectId],
+    kits: [Schema.Types.ObjectId],
     createdAt: Date,
     updatedAt: Date,
 })

@@ -18,8 +18,9 @@ export const typeDef = gql`
         _itemsMeta: _itemsMeta
     }
 
+    # TODO: editItem
     type Mutation {
-        createItem(name: String!, extUrl: String!): Item!
+        createItem(name: String!, extUrl: String): Item!
     }
 `
 
@@ -39,7 +40,7 @@ export const resolvers = {
     },
 
     Mutation: {
-        createItem: async (_: any, args: { name: string; extUrl: string }) => {
+        createItem: async (_: any, args: { name: string; extUrl?: string }) => {
             const item = new Item({ name: args.name, extUrl: args.extUrl })
             try {
                 await item.save()
