@@ -1,17 +1,31 @@
 import { User } from '@models/User'
-import schema from '@schemas/_schema'
-import { ApolloServer, gql } from 'apollo-server-express'
+import { gql } from 'apollo-server-express'
 import mongoose from 'mongoose'
 
-const testServer = new ApolloServer({ schema })
+import { useGlobalTestWrap } from '@lib/testHooks'
 
-beforeAll(async () => {
-    await mongoose.connect('mongodb://localhost:27017/packability-test')
-})
+const alreadyUsed = {
+    username: 'staticTestUser',
+    email: 'statictestuser@packability.io',
+}
 
-afterAll(async () => {
-    await mongoose.disconnect()
-})
+const addStaticTestUser = async () => {
+    // add static test user to database if not already present
+    let user = await User.findOne({ email: alreadyUsed.email })
+    if (!user) {
+        const now = new Date()
+        user = new User({
+            username: alreadyUsed.username,
+            email: alreadyUsed.email.toLowerCase(),
+            passwordHash: 'testpasshash',
+            createdAt: now,
+            updatedAt: now,
+        })
+        await user.save()
+    }
+}
+
+const testServer = useGlobalTestWrap({ beforeAllFn: addStaticTestUser })
 
 describe('create user mutation', () => {
     const CREATE_USER_MUTATION = gql`
@@ -49,12 +63,19 @@ describe('create user mutation', () => {
             expect(data.createUser.id).toBeDefined()
             expect(mongoose.isValidObjectId(data.createUser.id)).toBeTruthy()
         }
+
+        await User.deleteOne({ email: correctVars.email })
     })
 
     it('already used email', async () => {
+        const alreadyUsedEmailVars = {
+            ...correctVars,
+            email: alreadyUsed.email,
+        }
+
         const { data, errors } = await testServer.executeOperation({
             query: CREATE_USER_MUTATION,
-            variables: correctVars,
+            variables: alreadyUsedEmailVars,
         })
 
         expect(data).not.toBeTruthy()
@@ -68,7 +89,7 @@ describe('create user mutation', () => {
     it('username taken', async () => {
         const sameUsernameVars = {
             ...correctVars,
-            email: 'newtest@packability.io',
+            username: alreadyUsed.username,
         }
 
         const { data, errors } = await testServer.executeOperation({
@@ -82,8 +103,6 @@ describe('create user mutation', () => {
         if (errors) {
             expect(errors[0].message).toBe('Username already taken')
         }
-
-        await User.deleteOne({ email: correctVars.email })
     })
 
     it('no email', async () => {

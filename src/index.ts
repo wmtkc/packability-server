@@ -30,7 +30,7 @@ const startServer = async () => {
     app.post('/refresh_token', validateRefresh)
 
     // Connect to the database
-    await mongoose.connect('mongodb://localhost:27017/packability')
+    await mongoose.connect('mongodb://localhost:27017/packability-test')
     //mongoose.set('debug', true);
 
     // Start GraphQL Server

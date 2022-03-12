@@ -104,6 +104,7 @@ export const resolvers = {
             _: any,
             args: { username: string; email: string; password: string },
         ) => {
+            // TODO: username checking is case-insensitive, but usernames are stored with their case
             if (args.email == '') {
                 throw new Error('Email required')
             }
@@ -120,7 +121,9 @@ export const resolvers = {
                 throw new Error('Email must be valid')
             }
 
-            let existingUser = await User.findOne({ email: args.email })
+            let existingUser = await User.findOne({
+                email: args.email.toLowerCase(),
+            })
             if (existingUser) {
                 throw new Error('User with email already exists')
             }
@@ -133,7 +136,7 @@ export const resolvers = {
             const passwordHash = await bcrypt.hash(args.password, 10)
             const user = new User({
                 username: args.username,
-                email: args.email,
+                email: args.email.toLowerCase(),
                 passwordHash: passwordHash,
                 createdAt: now,
                 updatedAt: now,
@@ -159,7 +162,9 @@ export const resolvers = {
 
             // If usernameOrEmail matches email regex
             if (args.usernameOrEmail.toLowerCase().match(emailRegex)) {
-                user = await User.findOne({ email: args.usernameOrEmail })
+                user = await User.findOne({
+                    email: args.usernameOrEmail.toLowerCase(),
+                })
             } else {
                 user = await User.findOne({ username: args.usernameOrEmail })
             }
