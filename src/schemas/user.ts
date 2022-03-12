@@ -7,6 +7,9 @@ import { Schema } from 'mongoose'
 import { createAccessToken, setRefreshTokenCookie } from '@lib/auth'
 import { Context } from '@lib/context'
 
+const emailRegex =
+    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+
 const revokeRefreshTokensForUser = (user: User) => {
     user.tokenVersion++
     user.save()
@@ -101,9 +104,25 @@ export const resolvers = {
             _: any,
             args: { username: string; email: string; password: string },
         ) => {
+            if (args.email == '') {
+                throw new Error('Email required')
+            }
+
+            if (args.username == '') {
+                throw new Error('Username required')
+            }
+
+            if (args.password == '') {
+                throw new Error('Password required')
+            }
+
+            if (!args.email.toLowerCase().match(emailRegex)) {
+                throw new Error('Email must be valid')
+            }
+
             let existingUser = await User.findOne({ email: args.email })
             if (existingUser) {
-                throw new Error('User with email already exists.')
+                throw new Error('User with email already exists')
             }
 
             existingUser = await User.findOne({ username: args.username })
@@ -139,13 +158,7 @@ export const resolvers = {
             let user
 
             // If usernameOrEmail matches email regex
-            if (
-                args.usernameOrEmail
-                    .toLowerCase()
-                    .match(
-                        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-                    )
-            ) {
+            if (args.usernameOrEmail.toLowerCase().match(emailRegex)) {
                 user = await User.findOne({ email: args.usernameOrEmail })
             } else {
                 user = await User.findOne({ username: args.usernameOrEmail })

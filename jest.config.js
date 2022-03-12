@@ -30,4 +30,5 @@ module.exports = {
         '^.+\\.tsx?$': 'ts-jest',
     },
     moduleNameMapper: makeModuleNameMapper(SRC_PATH, TS_CONFIG_PATH),
+    testTimeout: 30000,
 }
