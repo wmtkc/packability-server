@@ -2,30 +2,9 @@ import { User } from '@models/User'
 import { gql } from 'apollo-server-express'
 import mongoose from 'mongoose'
 
-import { useGlobalTestWrap } from '@lib/testHooks'
+import { staticTestUser, useGlobalTestWrap } from '@lib/testHelpers'
 
-const alreadyUsed = {
-    username: 'staticTestUser',
-    email: 'statictestuser@packability.io',
-}
-
-const addStaticTestUser = async () => {
-    // add static test user to database if not already present
-    let user = await User.findOne({ email: alreadyUsed.email })
-    if (!user) {
-        const now = new Date()
-        user = new User({
-            username: alreadyUsed.username,
-            email: alreadyUsed.email.toLowerCase(),
-            passwordHash: 'testpasshash',
-            createdAt: now,
-            updatedAt: now,
-        })
-        await user.save()
-    }
-}
-
-const testServer = useGlobalTestWrap({ beforeAllFn: addStaticTestUser })
+const testServer = useGlobalTestWrap()
 
 describe('create user mutation', () => {
     const CREATE_USER_MUTATION = gql`
@@ -59,18 +38,15 @@ describe('create user mutation', () => {
         expect(errors).not.toBeTruthy()
 
         if (data) {
-            expect(data.createUser).toBeDefined()
-            expect(data.createUser.id).toBeDefined()
             expect(mongoose.isValidObjectId(data.createUser.id)).toBeTruthy()
+            await User.deleteOne({ email: correctVars.email })
         }
-
-        await User.deleteOne({ email: correctVars.email })
     })
 
     it('already used email', async () => {
         const alreadyUsedEmailVars = {
             ...correctVars,
-            email: alreadyUsed.email,
+            email: staticTestUser.email,
         }
 
         const { data, errors } = await testServer.executeOperation({
@@ -89,7 +65,7 @@ describe('create user mutation', () => {
     it('username taken', async () => {
         const sameUsernameVars = {
             ...correctVars,
-            username: alreadyUsed.username,
+            username: staticTestUser.username,
         }
 
         const { data, errors } = await testServer.executeOperation({
