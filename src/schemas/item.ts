@@ -20,13 +20,11 @@ export const typeDef = gql`
         count: Int!
     }
 
-    # TODO: _itemTypes - returns all ItemTypes for dynamic handling by client
     type Query {
         items(skip: Int, first: Int): [Item!]
         _itemsMeta: _itemsMeta
     }
 
-    # TODO: editItem
     type Mutation {
         createItem(name: String!, type: ItemType!, extUrl: String): Item!
     }

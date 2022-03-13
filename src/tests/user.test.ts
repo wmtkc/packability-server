@@ -140,3 +140,7 @@ describe('create user mutation', () => {
         }
     })
 })
+
+describe('delete user mutation', () => {})
+
+describe('edit user mutation', () => {})

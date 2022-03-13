@@ -34,9 +34,6 @@ export const typeDef = gql`
         _bagsMeta: _bagsMeta
     }
 
-    # TODO: removeBagKit
-    #       editBagKit
-    #       editBag
     type Mutation {
         createBag(name: String!, owner: String!): Bag!
         addBagKit(bag: ID!, kit: ID!, qty: Int): Bag!

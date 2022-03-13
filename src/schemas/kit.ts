@@ -39,9 +39,6 @@ export const typeDef = gql`
         _kitsMeta: _kitsMeta
     }
 
-    # TODO: removeKitItem
-    #       editKitItem
-    #       editKit
     type Mutation {
         createKit(name: String!, owner: String!): Kit!
         addKitItem(kit: ID!, item: ID!, qty: Int): Kit!

@@ -74,3 +74,25 @@ describe('create bag mutation', () => {
 
     it.skip('no name', () => {})
 })
+
+describe('delete bag mutation', () => {})
+
+describe('edit bag mutation', () => {})
+
+describe('add bag kit mutation', () => {
+    const ADD_BAG_KIT_MUTATION = gql`
+        mutation AddBagKit($bag: ID!, $kit: ID!) {
+            addBagKit(bag: $bag, kit: $kit) {
+                id
+                kits {
+                    kitId
+                    isDefault
+                }
+            }
+        }
+    `
+})
+
+describe('remove bag kit mutation', () => {})
+
+describe('edit bag kit mutation', () => {})

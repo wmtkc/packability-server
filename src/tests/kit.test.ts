@@ -67,3 +67,25 @@ describe('create kit mutation', () => {
 
     it.skip('no name', () => {})
 })
+
+describe('delete kit mutation', () => {})
+
+describe('edit kit mutation', () => {})
+
+describe('add kit item mutation', () => {
+    const ADD_KIT_ITEM_MUTATION = gql`
+        mutation AddKitItem($kit: ID!, $item: ID!, $qty: Int) {
+            addKitItem(kit: $kit, item: $item, qty: $qty) {
+                id
+                items {
+                    itemId
+                    qty
+                }
+            }
+        }
+    `
+})
+
+describe('remove kit item mutation', () => {})
+
+describe('edit kit item mutation', () => {})
