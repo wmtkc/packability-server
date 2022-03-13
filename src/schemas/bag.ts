@@ -4,6 +4,8 @@ import { User } from '@models/User'
 import { gql } from 'apollo-server-express'
 import { Schema } from 'mongoose'
 
+import { BagError, KitError, UserError, debugTags } from '@lib/errorMessages'
+
 // Define your types
 export const typeDef = gql`
     scalar Date
@@ -53,15 +55,13 @@ export const resolvers = {
         },
         getBagKits: async (_: any, args: { bag: Schema.Types.ObjectId }) => {
             const bag = await Bag.findById(args.bag)
-            if (!bag) throw new Error('Bag not found')
+            if (!bag) throw new Error(BagError.notFound)
             if (!bag.kits.length)
-                throw new Error('Bag has no kits -- How did this happen?')
+                throw new Error(BagError.noKits + debugTags.impossible)
 
             const kitsFound = await Kit.find({ id: { $in: bag.kits } })
             if (!kitsFound)
-                throw new Error(
-                    'Bag kits not found in database -- How did this happen?',
-                )
+                throw new Error(KitError.notFound + debugTags.impossible)
 
             return kitsFound
         },
@@ -78,7 +78,7 @@ export const resolvers = {
             args: { name: string; owner: Schema.Types.ObjectId },
         ) => {
             const user = await User.findById(args.owner)
-            if (!user) throw new Error('User not found')
+            if (!user) throw new Error(UserError.notFound)
 
             const bag = new Bag({
                 name: args.name,
@@ -123,10 +123,10 @@ export const resolvers = {
         ) => {
             // TODO: can we use Promise.allSettled() here d/s typescript? would prefer to run these requests in parallel
             const bag = await Bag.findById(args.bag)
-            if (!bag) throw new Error('Bag not found')
+            if (!bag) throw new Error(BagError.notFound)
 
             const kit = await Kit.findById(args.kit)
-            if (!kit) throw new Error('Kit not found')
+            if (!kit) throw new Error(KitError.notFound)
             kit.bag = bag.id
 
             let pushNewKit = true

@@ -2,6 +2,7 @@ import { Kit } from '@models/Kit'
 import { gql } from 'apollo-server-express'
 import mongoose from 'mongoose'
 
+import { KitError, UserError } from '@lib/errorMessages'
 import {
     expectErrorTest,
     getStaticTestUser,
@@ -57,7 +58,7 @@ describe('create kit mutation', () => {
                 name: testName,
                 owner: invalidUser,
             },
-            messageExpected: 'User not found',
+            messageExpected: UserError.notFound,
         })
     })
 
@@ -69,7 +70,7 @@ describe('create kit mutation', () => {
                 name: '',
                 owner: invalidUser,
             },
-            messageExpected: 'Kit must be named',
+            messageExpected: KitError.noName,
         })
     })
 })

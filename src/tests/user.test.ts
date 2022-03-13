@@ -2,6 +2,7 @@ import { User } from '@models/User'
 import { gql } from 'apollo-server-express'
 import mongoose from 'mongoose'
 
+import { UserError } from '@lib/errorMessages'
 import {
     expectErrorTest,
     staticTestUser,
@@ -57,7 +58,7 @@ describe('create user mutation', () => {
                 ...correctVars,
                 email: staticTestUser.email,
             },
-            messageExpected: 'User with email already exists',
+            messageExpected: UserError.emailAlreadyExists,
         })
     })
 
@@ -69,7 +70,7 @@ describe('create user mutation', () => {
                 ...correctVars,
                 username: staticTestUser.username,
             },
-            messageExpected: 'Username already taken',
+            messageExpected: UserError.usernameAlreadyExists,
         })
     })
 
@@ -81,7 +82,7 @@ describe('create user mutation', () => {
                 ...correctVars,
                 email: '',
             },
-            messageExpected: 'Email required',
+            messageExpected: UserError.noEmail,
         })
     })
 
@@ -93,7 +94,7 @@ describe('create user mutation', () => {
                 ...correctVars,
                 email: 'bademail',
             },
-            messageExpected: 'Email must be valid',
+            messageExpected: UserError.invalidEmail,
         })
     })
 
@@ -105,7 +106,7 @@ describe('create user mutation', () => {
                 ...correctVars,
                 username: '',
             },
-            messageExpected: 'Username required',
+            messageExpected: UserError.noUsername,
         })
     })
 
@@ -117,7 +118,7 @@ describe('create user mutation', () => {
                 ...correctVars,
                 username: 'a',
             },
-            messageExpected: 'Username must contain at least 4 characters',
+            messageExpected: UserError.usernameLength,
         })
     })
 
@@ -129,7 +130,7 @@ describe('create user mutation', () => {
                 ...correctVars,
                 username: 'puta',
             },
-            messageExpected: 'Username must not contain profanity',
+            messageExpected: UserError.usernameProfanity,
         })
     })
 
@@ -141,8 +142,7 @@ describe('create user mutation', () => {
                 ...correctVars,
                 username: '',
             },
-            messageExpected:
-                'Username must contain only numbers or latin letters',
+            messageExpected: UserError.usernameInvalidChars,
         })
     })
 })

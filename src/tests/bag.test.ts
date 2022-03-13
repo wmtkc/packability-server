@@ -3,6 +3,7 @@ import { Kit } from '@models/Kit'
 import { gql } from 'apollo-server-express'
 import mongoose from 'mongoose'
 
+import { BagError, UserError } from '@lib/errorMessages'
 import {
     expectErrorTest,
     getStaticTestUser,
@@ -64,7 +65,7 @@ describe('create bag mutation', () => {
                 name: testName,
                 owner: invalidUser,
             },
-            messageExpected: 'User not found',
+            messageExpected: UserError.notFound,
         })
     })
 
@@ -76,7 +77,7 @@ describe('create bag mutation', () => {
                 name: '',
                 owner: invalidUser,
             },
-            messageExpected: 'Bag must be named',
+            messageExpected: BagError.noName,
         })
     })
 })

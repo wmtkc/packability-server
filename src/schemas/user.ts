@@ -6,6 +6,7 @@ import { Schema } from 'mongoose'
 
 import { createAccessToken, setRefreshTokenCookie } from '@lib/auth'
 import { Context } from '@lib/context'
+import { BagError, UserError, debugTags } from '@lib/errorMessages'
 
 const emailRegex =
     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -81,14 +82,13 @@ export const resolvers = {
         },
         getUserBags: async (_: any, args: { user: Schema.Types.ObjectId }) => {
             const user = await User.findById(args.user)
-            if (!user) throw new Error('User not found')
-            if (!user.bags.length) throw new Error('Bag has no items')
+            if (!user) throw new Error(UserError.notFound)
+
+            if (!user.bags.length) return []
 
             const bagsFound = await Bag.find({ id: { $in: user.bags } })
             if (!bagsFound)
-                throw new Error(
-                    'Bag items not found in database -- How did this happen?',
-                )
+                throw new Error(BagError.notFound + debugTags.impossible)
 
             return bagsFound
         },
@@ -106,31 +106,31 @@ export const resolvers = {
         ) => {
             // TODO: username checking is case-insensitive, but usernames are stored with their case
             if (args.email == '') {
-                throw new Error('Email required')
+                throw new Error(UserError.noEmail)
             }
 
             if (args.username == '') {
-                throw new Error('Username required')
+                throw new Error(UserError.noUsername)
             }
 
             if (args.password == '') {
-                throw new Error('Password required')
+                throw new Error(UserError.noPassword)
             }
 
             if (!args.email.toLowerCase().match(emailRegex)) {
-                throw new Error('Email must be valid')
+                throw new Error(UserError.invalidEmail)
             }
 
             let existingUser = await User.findOne({
                 email: args.email.toLowerCase(),
             })
             if (existingUser) {
-                throw new Error('User with email already exists')
+                throw new Error(UserError.emailAlreadyExists)
             }
 
             existingUser = await User.findOne({ username: args.username })
             if (existingUser) {
-                throw new Error('Username already taken')
+                throw new Error(UserError.usernameAlreadyExists)
             }
 
             const passwordHash = await bcrypt.hash(args.password, 10)
@@ -155,8 +155,8 @@ export const resolvers = {
             context: Context,
         ) => {
             if (!args.usernameOrEmail)
-                throw new Error('Provide Username or Email')
-            if (!args.usernameOrEmail) throw new Error('Password Required')
+                throw new Error(UserError.noUsernameOrEmail)
+            if (!args.usernameOrEmail) throw new Error(UserError.noPassword)
 
             let user
 
@@ -169,11 +169,11 @@ export const resolvers = {
                 user = await User.findOne({ username: args.usernameOrEmail })
             }
 
-            if (!user) throw new Error('User does not exist')
+            if (!user) throw new Error(UserError.notFound)
 
             const match = await bcrypt.compare(args.password, user.passwordHash)
 
-            if (!match) throw new Error('Invalid Credentials')
+            if (!match) throw new Error(UserError.invalidCredentials)
 
             setRefreshTokenCookie(context.res, user)
 

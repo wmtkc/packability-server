@@ -4,6 +4,8 @@ import { User } from '@models/User'
 import { gql } from 'apollo-server-express'
 import { Schema } from 'mongoose'
 
+import { ItemError, KitError, UserError, debugTags } from '@lib/errorMessages'
+
 // Define your types
 export const typeDef = gql`
     scalar Date
@@ -58,16 +60,13 @@ export const resolvers = {
         },
         getKitItems: async (_: any, args: { kit: Schema.Types.ObjectId }) => {
             const kit = await Kit.findById(args.kit)
-            if (!kit) throw new Error('Kit not found')
+            if (!kit) throw new Error(KitError.notFound)
 
-            // TODO: this should fail silently and return empty array
-            if (!kit.items.length) throw new Error('Kit has no items')
+            if (!kit.items.length) return []
 
             const itemsFound = await Item.find({ id: { $in: kit.items } })
             if (!itemsFound)
-                throw new Error(
-                    'Kit items not found in database -- How did this happen?',
-                )
+                throw new Error(ItemError.notFound + debugTags.impossible)
 
             return itemsFound
         },
@@ -84,7 +83,7 @@ export const resolvers = {
             args: { name: string; owner: Schema.Types.ObjectId },
         ) => {
             const user = await User.findById(args.owner)
-            if (!user) throw new Error('User not found')
+            if (!user) throw new Error(UserError.notFound)
 
             const kit = new Kit({
                 name: args.name,
@@ -113,10 +112,10 @@ export const resolvers = {
         ) => {
             // TODO: can we use Promise.allSettled() here d/s typescript? would prefer to run these requests in parallel
             const kit = await Kit.findById(args.kit)
-            if (!kit) throw new Error('Kit not found')
+            if (!kit) throw new Error(KitError.notFound)
 
             const item = await Item.findById(args.item)
-            if (!item) throw new Error('Item not found')
+            if (!item) throw new Error(ItemError.notFound)
 
             let pushNewItem = true
             kit.items.forEach((item, index, arr) => {
