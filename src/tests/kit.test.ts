@@ -1,4 +1,3 @@
-import { Bag } from '@models/Bag'
 import { Kit } from '@models/Kit'
 import { gql } from 'apollo-server-express'
 import mongoose from 'mongoose'
@@ -11,26 +10,24 @@ import {
 
 const testServer = useGlobalTestWrap()
 
-describe('create bag mutation', () => {
-    const CREATE_BAG_MUTATION = gql`
-        mutation CreateBag($name: String!, $owner: String!) {
-            createBag(name: $name, owner: $owner) {
+describe('create kit mutation', () => {
+    const CREATE_KIT_MUTATION = gql`
+        mutation CreateKit($name: String!, $owner: String!) {
+            createKit(name: $name, owner: $owner) {
                 id
+                type
                 name
-                kits {
-                    kitId
-                    isDefault
-                }
             }
         }
     `
-    const testName = 'test bag'
+
+    const testName = 'test kit'
 
     it('correct variables', async () => {
         const staticTestUserId = await getStaticTestUser()
 
         const { data, errors } = await testServer.executeOperation({
-            query: CREATE_BAG_MUTATION,
+            query: CREATE_KIT_MUTATION,
             variables: {
                 name: testName,
                 owner: staticTestUserId,
@@ -41,23 +38,19 @@ describe('create bag mutation', () => {
         expect(data).toBeTruthy()
 
         if (data) {
-            const bag = data.createBag
+            const kit = data.createKit
 
-            expect(mongoose.isValidObjectId(bag.id)).toBeTruthy()
-            expect(bag.name).toEqual(testName)
-            expect(bag.kits.length).toBe(1)
-            expect(mongoose.isValidObjectId(bag.kits[0].kitId)).toBeTruthy()
-            expect(bag.kits[0].isDefault).toBe(true)
+            expect(mongoose.isValidObjectId(kit.id)).toBeTruthy()
+            expect(kit.name).toEqual(testName)
 
             // cleanup
-            await Bag.deleteOne({ _id: bag.id })
-            await Kit.deleteOne({ _id: bag.kits[0].kitId })
+            await Kit.deleteOne({ _id: kit.id })
         }
     })
 
     it('invalid owner', async () => {
         const { data, errors } = await testServer.executeOperation({
-            query: CREATE_BAG_MUTATION,
+            query: CREATE_KIT_MUTATION,
             variables: {
                 name: testName,
                 owner: invalidUser,

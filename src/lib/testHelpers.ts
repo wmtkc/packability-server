@@ -8,6 +8,8 @@ export const staticTestUser = {
     email: 'statictestuser@packability.io',
 }
 
+export const invalidUser = '696969b420e69f1d1b8da69a'
+
 /**
  * Get the id of the static test user
  * @returns string, id of static test user. will be null if used outside tests
@@ -18,7 +20,7 @@ export const getStaticTestUser = async () => {
 }
 
 /**
- * Global test jobs
+ * Apply global test jobs
  * @returns ApolloServer - test instance
  */
 export const useGlobalTestWrap = () => {

@@ -34,11 +34,13 @@ describe('create user mutation', () => {
             variables: correctVars,
         })
 
-        expect(data).toBeTruthy()
         expect(errors).not.toBeTruthy()
+        expect(data).toBeTruthy()
 
         if (data) {
             expect(mongoose.isValidObjectId(data.createUser.id)).toBeTruthy()
+
+            // cleanup
             await User.deleteOne({ email: correctVars.email })
         }
     })
