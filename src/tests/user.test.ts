@@ -2,7 +2,11 @@ import { User } from '@models/User'
 import { gql } from 'apollo-server-express'
 import mongoose from 'mongoose'
 
-import { staticTestUser, useGlobalTestWrap } from '@lib/testHelpers'
+import {
+    expectErrorTest,
+    staticTestUser,
+    useGlobalTestWrap,
+} from '@lib/testHelpers'
 
 const testServer = useGlobalTestWrap()
 
@@ -46,98 +50,100 @@ describe('create user mutation', () => {
     })
 
     it('already used email', async () => {
-        const alreadyUsedEmailVars = {
-            ...correctVars,
-            email: staticTestUser.email,
-        }
-
-        const { data, errors } = await testServer.executeOperation({
+        await expectErrorTest({
+            server: testServer,
             query: CREATE_USER_MUTATION,
-            variables: alreadyUsedEmailVars,
+            vars: {
+                ...correctVars,
+                email: staticTestUser.email,
+            },
+            messageExpected: 'User with email already exists',
         })
-
-        expect(data).not.toBeTruthy()
-        expect(errors).toBeTruthy()
-
-        if (errors) {
-            expect(errors[0].message).toBe('User with email already exists')
-        }
     })
 
     it('username taken', async () => {
-        const sameUsernameVars = {
-            ...correctVars,
-            username: staticTestUser.username,
-        }
-
-        const { data, errors } = await testServer.executeOperation({
+        await expectErrorTest({
+            server: testServer,
             query: CREATE_USER_MUTATION,
-            variables: sameUsernameVars,
+            vars: {
+                ...correctVars,
+                username: staticTestUser.username,
+            },
+            messageExpected: 'Username already taken',
         })
-
-        expect(data).not.toBeTruthy()
-        expect(errors).toBeTruthy()
-
-        if (errors) {
-            expect(errors[0].message).toBe('Username already taken')
-        }
     })
 
     it('no email', async () => {
-        const noEmailVars = {
-            ...correctVars,
-            email: '',
-        }
-
-        const { data, errors } = await testServer.executeOperation({
+        await expectErrorTest({
+            server: testServer,
             query: CREATE_USER_MUTATION,
-            variables: noEmailVars,
+            vars: {
+                ...correctVars,
+                email: '',
+            },
+            messageExpected: 'Email required',
         })
-
-        expect(data).not.toBeTruthy()
-        expect(errors).toBeTruthy()
-
-        if (errors) {
-            expect(errors[0].message).toBe('Email required')
-        }
     })
 
     it('bad email', async () => {
-        const badEmailVars = {
-            ...correctVars,
-            email: 'bademail',
-        }
-
-        const { data, errors } = await testServer.executeOperation({
+        await expectErrorTest({
+            server: testServer,
             query: CREATE_USER_MUTATION,
-            variables: badEmailVars,
+            vars: {
+                ...correctVars,
+                email: 'bademail',
+            },
+            messageExpected: 'Email must be valid',
         })
-
-        expect(data).not.toBeTruthy()
-        expect(errors).toBeTruthy()
-
-        if (errors) {
-            expect(errors[0].message).toBe('Email must be valid')
-        }
     })
 
     it('no username', async () => {
-        const noEmailVars = {
-            ...correctVars,
-            username: '',
-        }
-
-        const { data, errors } = await testServer.executeOperation({
+        await expectErrorTest({
+            server: testServer,
             query: CREATE_USER_MUTATION,
-            variables: noEmailVars,
+            vars: {
+                ...correctVars,
+                username: '',
+            },
+            messageExpected: 'Username required',
         })
+    })
 
-        expect(data).not.toBeTruthy()
-        expect(errors).toBeTruthy()
+    it.skip('username not long enough', async () => {
+        await expectErrorTest({
+            server: testServer,
+            query: CREATE_USER_MUTATION,
+            vars: {
+                ...correctVars,
+                username: 'a',
+            },
+            messageExpected: 'Username must contain at least 4 characters',
+        })
+    })
 
-        if (errors) {
-            expect(errors[0].message).toBe('Username required')
-        }
+    it.skip('username contains profanity', async () => {
+        await expectErrorTest({
+            server: testServer,
+            query: CREATE_USER_MUTATION,
+            vars: {
+                ...correctVars,
+                username: 'puta',
+            },
+            messageExpected: 'Username must not contain profanity',
+        })
+    })
+
+    it.skip('username contains invalid chars', async () => {
+        await expectErrorTest({
+            server: testServer,
+            query: CREATE_USER_MUTATION,
+            vars: {
+                ...correctVars,
+                username: '',
+            },
+            messageExpected:
+                'Username must contain only numbers or latin letters',
+        })
     })
 })
 

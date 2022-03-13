@@ -1,6 +1,7 @@
 import { User } from '@models/User'
 import schema from '@schemas/_schema'
 import { ApolloServer } from 'apollo-server-express'
+import { DocumentNode } from 'graphql'
 import mongoose from 'mongoose'
 
 export const staticTestUser = {
@@ -50,4 +51,28 @@ export const useGlobalTestWrap = () => {
     afterEach(() => {})
 
     return new ApolloServer({ schema })
+}
+
+export const expectErrorTest = async ({
+    server,
+    query,
+    vars,
+    messageExpected,
+}: {
+    server: ApolloServer
+    query: DocumentNode
+    vars: any
+    messageExpected: string
+}) => {
+    const { data, errors } = await server.executeOperation({
+        query: query,
+        variables: vars,
+    })
+
+    expect(data).not.toBeTruthy()
+    expect(errors).toBeTruthy()
+
+    if (errors) {
+        expect(errors[0].message).toBe(messageExpected)
+    }
 }

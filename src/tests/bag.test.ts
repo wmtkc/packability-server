@@ -4,6 +4,7 @@ import { gql } from 'apollo-server-express'
 import mongoose from 'mongoose'
 
 import {
+    expectErrorTest,
     getStaticTestUser,
     invalidUser,
     useGlobalTestWrap,
@@ -56,23 +57,28 @@ describe('create bag mutation', () => {
     })
 
     it('invalid owner', async () => {
-        const { data, errors } = await testServer.executeOperation({
+        await expectErrorTest({
+            server: testServer,
             query: CREATE_BAG_MUTATION,
-            variables: {
+            vars: {
                 name: testName,
                 owner: invalidUser,
             },
+            messageExpected: 'User not found',
         })
-
-        expect(data).not.toBeTruthy()
-        expect(errors).toBeTruthy()
-
-        if (errors) {
-            expect(errors[0].message).toBe('User not found')
-        }
     })
 
-    it.skip('no name', () => {})
+    it.skip('no name', async () => {
+        await expectErrorTest({
+            server: testServer,
+            query: CREATE_BAG_MUTATION,
+            vars: {
+                name: '',
+                owner: invalidUser,
+            },
+            messageExpected: 'Bag must be named',
+        })
+    })
 })
 
 describe('delete bag mutation', () => {})
