@@ -1,9 +1,3 @@
-/**
- * a
- * a
- * a
- */
-
 export const BagError = {
     notFound: 'Bag not found',
     noKits: 'Bag has no kits -- How did this happen?',
