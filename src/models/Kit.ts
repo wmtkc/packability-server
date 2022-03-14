@@ -6,6 +6,12 @@ export enum KitType {
     None = 'NONE',
 }
 
+// Default names
+export const KitName = {
+    Wishlist: 'Wishlist',
+    Default: 'Uncategorized',
+}
+
 export interface Kit extends Document {
     name: string
     type: KitType

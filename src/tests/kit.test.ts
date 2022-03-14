@@ -39,15 +39,14 @@ describe('create kit mutation', () => {
         expect(errors).not.toBeTruthy()
         expect(data).toBeTruthy()
 
-        if (data) {
-            const kit = data.createKit
+        if (!data) return
+        const kit = data.createKit
 
-            expect(mongoose.isValidObjectId(kit.id)).toBeTruthy()
-            expect(kit.name).toEqual(testName)
+        expect(mongoose.isValidObjectId(kit.id)).toBeTruthy()
+        expect(kit.name).toEqual(testName)
 
-            // cleanup
-            await Kit.findByIdAndDelete(kit.id)
-        }
+        // cleanup
+        await Kit.findByIdAndDelete(kit.id)
     })
 
     it('invalid owner', async () => {

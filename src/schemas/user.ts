@@ -1,5 +1,5 @@
 import { Bag } from '@models/Bag'
-import { Kit, KitType } from '@models/Kit'
+import { Kit, KitName, KitType } from '@models/Kit'
 import { User } from '@models/User'
 import { gql } from 'apollo-server-express'
 import bcrypt from 'bcrypt'
@@ -146,7 +146,7 @@ export const resolvers = {
 
             // initialize user with default kit
             const defaultKit = new Kit({
-                name: 'Uncategorized',
+                name: KitName.Default,
                 type: KitType.Default,
                 owner: user.id,
                 createdAt: now,
@@ -156,7 +156,7 @@ export const resolvers = {
 
             // initialize user with wishlist kit
             const wishlistKit = new Kit({
-                name: 'Wishlist',
+                name: KitName.Wishlist,
                 type: KitType.Wishlist,
                 owner: user.id,
                 createdAt: now,

@@ -42,20 +42,19 @@ describe('create bag mutation', () => {
         expect(errors).not.toBeTruthy()
         expect(data).toBeTruthy()
 
-        if (data) {
-            const bag = await Bag.findById(data.createBag.id)
+        if (!data) return
+        const bag = await Bag.findById(data.createBag.id)
 
-            if (bag) {
-                expect(mongoose.isValidObjectId(bag.id)).toBeTruthy()
-                expect(bag.name).toEqual(testName)
-                expect(bag.kits.length).toBe(0)
-                expect(mongoose.isValidObjectId(bag.defaultKit)).toBeTruthy()
+        if (!bag) return
+        expect(mongoose.isValidObjectId(bag.id)).toBeTruthy()
+        expect(bag.name).toEqual(testName)
+        expect(bag.owner.toString()).toEqual(staticTestUserId)
+        expect(bag.kits.length).toBe(0)
+        expect(mongoose.isValidObjectId(bag.defaultKit)).toBeTruthy()
 
-                // cleanup
-                await Bag.findByIdAndDelete(bag.id)
-                await Kit.findByIdAndDelete(bag.defaultKit)
-            }
-        }
+        // cleanup
+        await Bag.findByIdAndDelete(bag.id)
+        await Kit.findByIdAndDelete(bag.defaultKit)
     })
 
     it('invalid owner', async () => {
