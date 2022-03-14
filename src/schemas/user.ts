@@ -1,4 +1,5 @@
 import { Bag } from '@models/Bag'
+import { Kit, KitType } from '@models/Kit'
 import { User } from '@models/User'
 import { gql } from 'apollo-server-express'
 import bcrypt from 'bcrypt'
@@ -27,6 +28,7 @@ export const typeDef = gql`
         passwordHash: String
         name: String
         bags: [ID!]
+        kits: [ID!]
         createdAt: Date
         updatedAt: Date
     }
@@ -142,8 +144,30 @@ export const resolvers = {
                 updatedAt: now,
             })
 
+            // initialize user with default kit
+            const defaultKit = new Kit({
+                name: 'Uncategorized',
+                type: KitType.Default,
+                owner: user.id,
+                createdAt: now,
+                updatedAt: now,
+            })
+            user.defaultKit = defaultKit.id
+
+            // initialize user with wishlist kit
+            const wishlistKit = new Kit({
+                name: 'Wishlist',
+                type: KitType.Wishlist,
+                owner: user.id,
+                createdAt: now,
+                updatedAt: now,
+            })
+            user.wishlistKit = wishlistKit.id
+
             try {
                 await user.save()
+                await defaultKit.save()
+                await wishlistKit.save()
                 return user
             } catch (err) {
                 throw err

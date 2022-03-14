@@ -46,7 +46,7 @@ describe('create kit mutation', () => {
             expect(kit.name).toEqual(testName)
 
             // cleanup
-            await Kit.deleteOne({ _id: kit.id })
+            await Kit.findByIdAndDelete(kit.id)
         }
     })
 

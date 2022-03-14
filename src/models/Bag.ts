@@ -7,9 +7,9 @@ export interface Bag extends Document {
         {
             kitId: Schema.Types.ObjectId
             qty: number
-            isDefault: boolean
         },
     ]
+    defaultKit: Schema.Types.ObjectId
     createdAt: Date
     updatedAt: Date
 }
@@ -21,9 +21,9 @@ const schema = new Schema<Bag>({
         {
             kitId: Schema.Types.ObjectId,
             qty: Number,
-            isDefault: Boolean,
         },
     ],
+    defaultKit: Schema.Types.ObjectId,
     createdAt: Date,
     updatedAt: Date,
 })

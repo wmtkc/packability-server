@@ -8,6 +8,8 @@ export interface User extends Document {
     name: string
     bags: [Schema.Types.ObjectId]
     kits: [Schema.Types.ObjectId]
+    defaultKit: Schema.Types.ObjectId
+    wishlistKit: Schema.Types.ObjectId
     createdAt: Date
     updatedAt: Date
 }
@@ -20,6 +22,8 @@ const schema = new Schema<User>({
     name: String,
     bags: [Schema.Types.ObjectId],
     kits: [Schema.Types.ObjectId],
+    defaultKit: Schema.Types.ObjectId,
+    wishlistKit: Schema.Types.ObjectId,
     createdAt: Date,
     updatedAt: Date,
 })

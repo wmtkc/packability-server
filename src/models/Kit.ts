@@ -2,6 +2,7 @@ import { Document, Schema, model } from 'mongoose'
 
 export enum KitType {
     Default = 'DEFAULT',
+    Wishlist = 'WISHLIST',
     None = 'NONE',
 }
 

@@ -73,6 +73,6 @@ export const expectErrorTest = async ({
     expect(errors).toBeTruthy()
 
     if (errors) {
-        expect(errors[0].message).toBe(messageExpected)
+        expect(errors[0].message).toEqual(messageExpected)
     }
 }

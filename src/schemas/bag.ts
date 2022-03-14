@@ -96,18 +96,13 @@ export const resolvers = {
                 bag: bag.id,
                 createdAt: now,
                 updatedAt: now,
-                isDefault: true,
             })
-            bag.kits.push({
-                kitId: defaultKit.id,
-                qty: 1,
-                isDefault: true,
-            })
+            bag.defaultKit = defaultKit.id
 
             try {
-                let result = await bag.save()
                 await defaultKit.save()
                 await user.save()
+                let result = await bag.save()
                 return result
             } catch (err) {
                 throw err
@@ -141,7 +136,6 @@ export const resolvers = {
                 bag.kits.push({
                     kitId: args.kit,
                     qty: args.qty ?? 1,
-                    isDefault: false,
                 })
             }
 

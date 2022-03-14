@@ -12,6 +12,7 @@ export const typeDef = gql`
 
     enum KitType {
         DEFAULT
+        WISHLIST
         NONE
     }
 
@@ -78,6 +79,7 @@ export const resolvers = {
     },
 
     Mutation: {
+        // TODO: optional bag arg
         createKit: async (
             _: any,
             args: { name: string; owner: Schema.Types.ObjectId },

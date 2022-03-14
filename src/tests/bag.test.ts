@@ -43,17 +43,18 @@ describe('create bag mutation', () => {
         expect(data).toBeTruthy()
 
         if (data) {
-            const bag = data.createBag
+            const bag = await Bag.findById(data.createBag.id)
 
-            expect(mongoose.isValidObjectId(bag.id)).toBeTruthy()
-            expect(bag.name).toEqual(testName)
-            expect(bag.kits.length).toBe(1)
-            expect(mongoose.isValidObjectId(bag.kits[0].kitId)).toBeTruthy()
-            expect(bag.kits[0].isDefault).toBe(true)
+            if (bag) {
+                expect(mongoose.isValidObjectId(bag.id)).toBeTruthy()
+                expect(bag.name).toEqual(testName)
+                expect(bag.kits.length).toBe(0)
+                expect(mongoose.isValidObjectId(bag.defaultKit)).toBeTruthy()
 
-            // cleanup
-            await Bag.deleteOne({ _id: bag.id })
-            await Kit.deleteOne({ _id: bag.kits[0].kitId })
+                // cleanup
+                await Bag.findByIdAndDelete(bag.id)
+                await Kit.findByIdAndDelete(bag.defaultKit)
+            }
         }
     })
 

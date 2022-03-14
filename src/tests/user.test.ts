@@ -1,3 +1,4 @@
+import { Kit } from '@models/Kit'
 import { User } from '@models/User'
 import { gql } from 'apollo-server-express'
 import mongoose from 'mongoose'
@@ -45,8 +46,24 @@ describe('create user mutation', () => {
         if (data) {
             expect(mongoose.isValidObjectId(data.createUser.id)).toBeTruthy()
 
-            // cleanup
-            await User.deleteOne({ email: correctVars.email })
+            let user = await User.findById(data.createUser.id)
+            expect(user).toBeDefined()
+
+            if (user) {
+                expect(user.username).toEqual(correctVars.username)
+                expect(user.email).toEqual(correctVars.email)
+                expect(user.name).toBeUndefined()
+                expect(user.kits.length).toEqual(0)
+                expect(mongoose.isValidObjectId(user.wishlistKit)).toBeTruthy()
+                expect(mongoose.isValidObjectId(user.defaultKit)).toBeTruthy()
+
+                // TODO: test wishlist and default kit properties
+
+                // cleanup
+                await User.findByIdAndDelete(user.id)
+                await Kit.findByIdAndDelete(user.wishlistKit)
+                await Kit.findByIdAndDelete(user.defaultKit)
+            }
         }
     })
 
@@ -150,3 +167,9 @@ describe('create user mutation', () => {
 describe('delete user mutation', () => {})
 
 describe('edit user mutation', () => {})
+
+describe('is username available query', () => {})
+
+describe('get user bags query', () => {})
+
+describe('get user kits query', () => {})
