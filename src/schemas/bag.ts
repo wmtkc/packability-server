@@ -20,7 +20,7 @@ export const typeDef = gql`
     type Bag {
         id: ID!
         name: String!
-        owner: ID!
+        owner: User
         kits: [BagKit!]!
         createdAt: Date
         updatedAt: Date
@@ -52,6 +52,7 @@ export const resolvers = {
             return await Bag.find()
                 .skip(args.skip ?? 0)
                 .limit(args.first ?? 0)
+                .populate('owner')
         },
         getBagKits: async (_: any, args: { bag: Schema.Types.ObjectId }) => {
             const bag = await Bag.findById(args.bag)
@@ -67,7 +68,7 @@ export const resolvers = {
         },
         _bagsMeta: async () => {
             return {
-                count: await Bag.count(err => console.log(err)),
+                count: await Bag.count(),
             }
         },
     },

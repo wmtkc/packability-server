@@ -16,14 +16,14 @@ export interface Bag extends Document {
 
 const schema = new Schema<Bag>({
     name: String,
-    owner: Schema.Types.ObjectId,
+    owner: { type: Schema.Types.ObjectId, ref: 'User' },
     kits: [
         {
-            kitId: Schema.Types.ObjectId,
+            kitId: { type: Schema.Types.ObjectId, ref: 'Kit' },
             qty: Number,
         },
     ],
-    defaultKit: Schema.Types.ObjectId,
+    defaultKit: { type: Schema.Types.ObjectId, ref: 'Kit' },
     createdAt: Date,
     updatedAt: Date,
 })
